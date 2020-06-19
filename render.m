@@ -24,7 +24,7 @@ if((~isfloat(frame)) || (max(max(max(frame))) > 1))
 end
 
 %% Convert bg to double, [0,1] if not already double
-if ((~isfloat(bg)) || (max(max(max(bg))) > 1)) && (size(bg, 4) <= 1)
+if (~isfloat(bg)) || (max(max(max(bg))) > 1)
     bg = double(bg)./255.0;
 end
 
