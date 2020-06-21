@@ -1,0 +1,11 @@
+classdef ImageReader
+  % Add class description here
+  %
+  %
+   properties
+      Value {mustBeNumeric}
+   end
+   methods
+      
+   end
+end

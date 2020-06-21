@@ -16,14 +16,14 @@
 src = "Path/to/my/ChokePoint/P1E_S1";
 
 % Select Cameras
-% L =
-% R =
+L = 1
+R = 2
 
 % Choose a start point
-% start = randi(1000)
+start = 1
 
 % Choose the number of succseeding frames
-% N =
+N = 3
 
 ir = ImageReader(src, L, R, start, N);
 
