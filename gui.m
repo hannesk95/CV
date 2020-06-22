@@ -22,7 +22,7 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 21-Jun-2020 14:27:11
+% Last Modified by GUIDE v2.5 22-Jun-2020 20:27:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,6 +55,7 @@ function gui_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for gui
 handles.output = hObject;
 
+% Initialize GUI variables
 handles.imreader = 0;
 handles.image_left = zeros(600, 800, 3);
 handles.image_right = zeros(600, 800, 3);
@@ -64,12 +65,13 @@ handles.timer_playback.Period = 0.033;
 handles.timer_playback.ExecutionMode = 'fixedSpacing';
 handles.timer_playback.TimerFcn = @(~,~) timer_playback_callback(hObject);
 
+% Install event listeners
 addlistener(handles.text_directory, ...
             'String', ...
             'PostSet', ...
             @(hObj, evnt) execute_callbacks( ...
                 { ...
-                    @imagereader_init_callback, ...
+                    @imagereader_init, ...
                     @update_images, ...
                     @draw_images ...
                 }, ...
@@ -82,7 +84,43 @@ addlistener(handles.text_start, ...
             @(hObj, evnt) execute_callbacks( ...
                 { ...
                     @sanitize_text_start, ...
-                    @imagereader_change_callback, ...
+                    @imagereader_init, ...
+                    @update_images, ...
+                    @draw_images ...
+                }, ...
+                hObject ...
+            ) ...
+);
+addlistener(handles.text_n, ...
+            'String', ...
+            'PostSet', ...
+            @(hObj, evnt) execute_callbacks( ...
+                { ...
+                    @imagereader_init, ...
+                    @update_images, ...
+                    @draw_images ...
+                }, ...
+                hObject ...
+            ) ...
+);
+addlistener(handles.popup_channel_left, ...
+            'Value', ...
+            'PostSet', ...
+            @(hObj, evnt) execute_callbacks( ...
+                { ...
+                    @imagereader_init, ...
+                    @update_images, ...
+                    @draw_images ...
+                }, ...
+                hObject ...
+            ) ...
+);
+addlistener(handles.popup_channel_right, ...
+            'Value', ...
+            'PostSet', ...
+            @(hObj, evnt) execute_callbacks( ...
+                { ...
+                    @imagereader_init, ...
                     @update_images, ...
                     @draw_images ...
                 }, ...
@@ -123,36 +161,51 @@ draw_images(hObject);
 
 % --- Executes callbacks.
 function execute_callbacks(callback_arr, figure)
+% Helper function to guarantee execution order of callbacks.
+% callback_arr    Array containing callback functions
+% figure          Parent figure (gets passed to callbacks)
 for i = 1:numel(callback_arr)
     cbfn = cell2mat(callback_arr(i));
     ret = cbfn(figure);
     if ~ret
+        % Stop further callback execution if a callback returns false
         break;
     end
 end
 
 
-% --- Sanitizes text_start input
+% --- Sanitizes text_start input.
 function ret = sanitize_text_start(figure)
 fprintf('sanitize_text_start\n')
 handles = guidata(figure);
+
+% Read in start number
 number = str2double(get(handles.text_start,'String'));
 if isnan(number) || number < 0
+    % Sanitize invalid values
     number = 0;
 end
+
+% Convert value to integer and update daata
 set(handles.text_start, 'String', sprintf("%d", int32(number)))
 guidata(figure, handles);
 ret = true;
 
 
-% --- Sanitizes popup_mode input
+% --- Sanitizes popup_mode input.
 function ret = sanitize_popup_mode(figure)
 fprintf('sanitize_popup_mode\n')
 handles = guidata(figure);
+
+% Read selected rendermode
 contents = cellstr(get(handles.popup_mode,'String'));
 selected = contents{get(handles.popup_mode,'Value')};
+
+% Check if valid option
 if strcmp(selected, 'substitute') && strlength(get(handles.text_background, 'String')) == 0
     msgbox('Kein Hintergrundbild ausgewählt!');
+    
+    % Reset selected value and update data
     set(handles.popup_mode, 'Value', 1);
     guidata(figure, handles);
 end
@@ -160,35 +213,36 @@ ret = true;
 
 
 % --- Initializes imagereader property.
-function ret = imagereader_init_callback(figure)
+function ret = imagereader_init(figure)
 fprintf('imagereader_init_callback\n')
-config
-if ~exist('N')
-    N = 1;
-    fprintf("Using default value N = %d\n", N)
-end
-if ~exist('L') || ~exist('R')
-    L = 1;
-    R = 3;
-    fprintf("Using default values L = %d and R = %d\n", L, R)
-end
 handles = guidata(figure);
+
+% Read left channel selection
+contents = cellstr(get(handles.popup_channel_left,'String'));
+L = str2double(contents{get(handles.popup_channel_left,'Value')});
+
+% Read right channel selection
+contents = cellstr(get(handles.popup_channel_right,'String'));
+R = str2double(contents{get(handles.popup_channel_right,'Value')});
+
+% Read other parameters for ImageReader
+N = str2double(get(handles.text_n,'String'));
 start = str2double(get(handles.text_start,'String'));
 src = get(handles.text_directory,'String');
+
+% Initialize ImageReader
 handles.imreader = ImageReader(src, L, R, start, N);
+
+% Enable Controls
 set(handles.text_start, 'Enable', 'on');
 set(handles.button_start_inc, 'Enable', 'on');
 set(handles.button_start_decr, 'Enable', 'on');
-guidata(figure, handles);
-ret = true;
+set(handles.button_n_inc, 'Enable', 'on');
+set(handles.button_n_decr, 'Enable', 'on');
+set(handles.popup_channel_left, 'Enable', 'on');
+set(handles.popup_channel_right, 'Enable', 'on');
 
-
-% --- Changes imagereader property.
-function ret = imagereader_change_callback(figure)
-fprintf('imagereader_change_callback\n')
-handles = guidata(figure);
-start = str2double(get(handles.text_start,'String'));
-handles.imreader.setCurrentFrame(start);
+% Update data
 guidata(figure, handles);
 ret = true;
 
@@ -197,13 +251,23 @@ ret = true;
 function ret = draw_images(figure)
 fprintf('draw_images\n')
 handles = guidata(figure);
+
+% Show left and right input channel
 imshow(handles.image_left, 'Parent', handles.axes_input_left);
 imshow(handles.image_right, 'Parent', handles.axes_input_right);
+
+% Calculate mask
 mask = segmentation(handles.image_left, handles.image_right);
+
+% Read rendermode selection
 contents = cellstr(get(handles.popup_mode,'String'));
 rendermode = contents{get(handles.popup_mode,'Value')};
+
+% Render and show output image
 image_output = render(handles.image_left, mask, handles.image_background, rendermode);
 imshow(image_output, 'Parent', handles.axes_output);
+
+% Update data
 guidata(figure, handles);
 ret = true;
 
@@ -212,28 +276,50 @@ ret = true;
 function ret = update_images(figure)
 fprintf('update_images\n')
 handles = guidata(figure);
+
+% Read next tensors from ImageReader
 [tensor_left, tensor_right, ~] = handles.imreader.next();
+
+% Store first images from tensors in buffer
 handles.image_left(:) = tensor_left(1:numel(handles.image_left));
 handles.image_right(:) = tensor_right(1:numel(handles.image_right));
+
+% Update data
 guidata(figure, handles);
 ret = true;
 
 
-% --- Function called by timer_playback.
+% --- Function periodically called by timer_playback.
 function timer_playback_callback(figure)
 handles = guidata(figure);
+
+% Read next tensors from ImageReader
 [tensor_left, tensor_right, loop] = handles.imreader.next();
+
+% Store first images from tensors in buffer
 handles.image_left(:) = tensor_left(1:numel(handles.image_left));
 handles.image_right(:) = tensor_right(1:numel(handles.image_right));
+
+% Show buffered images and output image
 draw_images(figure);
+
+% Check if end of sequence reached
 if loop && ~get(handles.checkbox_loop, 'Value')
     stop(handles.timer_playback);
+    
+    % Reset controls
     set(handles.button_stop, 'Enable', 'off');
     set(handles.button_play, 'Enable', 'on');
     set(handles.text_start, 'Enable', 'on');
     set(handles.button_start_inc, 'Enable', 'on');
     set(handles.button_start_decr, 'Enable', 'on');
+    set(handles.button_n_inc, 'Enable', 'on');
+    set(handles.button_n_decr, 'Enable', 'on');
+    set(handles.popup_channel_left, 'Enable', 'on');
+    set(handles.popup_channel_right, 'Enable', 'on');
 end
+
+% Update data
 guidata(figure);
 
 
@@ -398,6 +484,10 @@ else
     set(handles.text_start, 'Enable', 'off');
     set(handles.button_start_inc, 'Enable', 'off');
     set(handles.button_start_decr, 'Enable', 'off');
+    set(handles.button_n_inc, 'Enable', 'off');
+    set(handles.button_n_decr, 'Enable', 'off');
+    set(handles.popup_channel_left, 'Enable', 'off');
+    set(handles.popup_channel_right, 'Enable', 'off');
     start(handles.timer_playback);
 end
 
@@ -422,10 +512,8 @@ set(handles.button_play, 'Enable', 'on');
 set(handles.button_pause, 'Enable', 'off');
 set(handles.button_stop, 'Enable', 'off');
 set(handles.text_start, 'Enable', 'on');
-set(handles.button_start_inc, 'Enable', 'on');
-set(handles.button_start_decr, 'Enable', 'on');
-number = str2double(get(handles.text_start,'String'));
-handles.imreader.setCurrentFrame(number);
+guidata(hObject,handles)
+imagereader_init(hObject);
 
 
 % --- Executes on button press in checkbox_loop.
@@ -442,3 +530,92 @@ function button_save_Callback(hObject, eventdata, handles)
 % hObject    handle to button_save (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in popup_channel_left.
+function popup_channel_left_Callback(hObject, eventdata, handles)
+% hObject    handle to popup_channel_left (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popup_channel_left contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popup_channel_left
+
+
+% --- Executes during object creation, after setting all properties.
+function popup_channel_left_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popup_channel_left (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popup_channel_right.
+function popup_channel_right_Callback(hObject, eventdata, handles)
+% hObject    handle to popup_channel_right (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popup_channel_right contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popup_channel_right
+
+
+% --- Executes during object creation, after setting all properties.
+function popup_channel_right_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popup_channel_right (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function text_n_Callback(hObject, eventdata, handles)
+% hObject    handle to text_n (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of text_n as text
+%        str2double(get(hObject,'String')) returns contents of text_n as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function text_n_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to text_n (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in button_n_decr.
+function button_n_decr_Callback(hObject, eventdata, handles)
+% hObject    handle to button_n_decr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+number = str2double(get(handles.text_n,'String'));
+if number > 1
+    set(handles.text_n,'String', sprintf("%d", number - 1));
+end
+
+
+% --- Executes on button press in button_n_inc.
+function button_n_inc_Callback(hObject, eventdata, handles)
+% hObject    handle to button_n_inc (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+number = str2double(get(handles.text_n,'String'));
+set(handles.text_n,'String', sprintf("%d", number + 1));
