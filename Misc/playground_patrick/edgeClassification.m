@@ -87,6 +87,6 @@ plot(corDyn(1,:), corDyn(2,:), 'g *');
 disp('Num features likely on foreground: ' + string(sum(selection)))
 
 
-
+%% Classify edges
 
 
