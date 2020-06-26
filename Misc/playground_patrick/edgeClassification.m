@@ -87,6 +87,27 @@ plot(corDyn(1,:), corDyn(2,:), 'g *');
 disp('Num features likely on foreground: ' + string(sum(selection)))
 
 
-%% Classify edges
+%% Edge classification - not working yet
+
+corDyn2 = corDyn(1:2, :);
+corDyn2 = corDyn2';
+
+[B,L] = bwboundaries(edges, 'noholes');
+contours_human = zeros(1, length(B));
+
+
+hold on
+for k = 1:length(B)
+   boundary = B{k};
+   for j = 1: size(corDyn2, 1)
+      l1 = find(boundary(:, 1) == corDyn2(j, 1));
+      l2 = find(boundary(:, 2) == corDyn2(j, 2));
+      
+      if (~isempty(l1) && ~isempty(l2))
+          contours_human(j) = 1;
+      end
+   end
+   plot(boundary(:,2), boundary(:,1), 'w', 'LineWidth', 2)
+end
 
 
