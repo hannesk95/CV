@@ -1,26 +1,3 @@
-<<<<<<< HEAD
-classdef ImageReader
-  % Add class description here
-  %
-  %
-   properties
-       N
-       start
-   end
-   methods
-      function obj = ImageReader(src, L, R, start, N)
-        fprintf('ImageReader("%s", %d, %d, %d, %d)\n', src, L, R, start, N)
-        obj.N = N;
-        obj.start = start;
-      end
-      function [left, right, loop] = next(obj)
-          left = zeros(600,800,(obj.N + 1)*3);
-          right = zeros(600,800,(obj.N + 1)*3);
-          fprintf('next(), start: %d\n', obj.start);
-          loop = false;
-      end
-   end
-=======
 classdef ImageReader < handle
     
     properties
@@ -71,17 +48,17 @@ classdef ImageReader < handle
             % Check left camera (L) value
             if ~(isnumeric(L))
                 error('Left camera input parameter "L" must be numeric');
-            elseif L ~= (1 | 2)
-                error('Left camera input parameter "L" must be either 1 or 2');
+            %elseif L ~= (1 | 2)
+            %    error('Left camera input parameter "L" must be either 1 or 2');
             end
             
             % Check right camera (R) value
             if ~(isnumeric(R))
                 error('Right camera input parameter "R must be numeric');
-            elseif R ~= (2) % Include 3 !!!!
-                error('Right camera input parameter "R" must be either 2 or 3');
-            elseif R == L
-                error('If left camera paramter "L = 2" then right frame paramter "R" has to be 3');
+            %elseif R ~= (2) % Include 3 !!!!
+            %    error('Right camera input parameter "R" must be either 2 or 3');
+            %elseif R == L
+            %    error('If left camera paramter "L = 2" then right frame paramter "R" has to be 3');
             end
             
             % Check inital framenumber (start) value
@@ -180,7 +157,6 @@ classdef ImageReader < handle
             
         end
     end
->>>>>>> ce4ce858177136926d696718fcaf978ad0d6dffd
 end
 
 

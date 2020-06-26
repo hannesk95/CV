@@ -58,8 +58,8 @@ handles.output = hObject;
 % Initialize GUI variables
 handles.imreader = 0;
 handles.image_left = uint8(zeros(600, 800, 3));
-handles.image_right = uint8(zeros(600, 800, 3));
-handles.image_background = uint8(zeros(600, 800, 3));
+handles.image_right = zeros(600, 800, 3);
+handles.image_background = zeros(600, 800, 3);
 handles.timer_playback = timer;
 handles.timer_playback.Period = 0.033;
 handles.timer_playback.ExecutionMode = 'fixedSpacing';
@@ -291,15 +291,17 @@ ret = true;
 
 % --- Function periodically called by timer_playback.
 function timer_playback_callback(figure)
-fprintf('timer_playback_callback\n')
 handles = guidata(figure);
 
 % Read next tensors from ImageReader
 [tensor_left, tensor_right, loop] = handles.imreader.next();
 
 % Store first images from tensors in buffer
-handles.image_left(:) = tensor_left(:, :, 1:3);
-handles.image_right(:) = tensor_right(:, :, 1:3);
+handles.image_left(:) = tensor_left(1:numel(handles.image_left));
+handles.image_right(:) = tensor_right(1:numel(handles.image_right));
+
+% Show buffered images and output image
+draw_images(figure);
 
 % Check if end of sequence reached
 if loop && ~get(handles.checkbox_loop, 'Value')
@@ -318,10 +320,7 @@ if loop && ~get(handles.checkbox_loop, 'Value')
 end
 
 % Update data
-guidata(figure, handles);
-
-% Show buffered images and output image
-draw_images(figure);
+guidata(figure);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -515,8 +514,6 @@ set(handles.button_stop, 'Enable', 'off');
 set(handles.text_start, 'Enable', 'on');
 guidata(hObject,handles)
 imagereader_init(hObject);
-update_images(hObject);
-draw_images(hObject);
 
 
 % --- Executes on button press in checkbox_loop.
