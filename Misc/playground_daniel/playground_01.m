@@ -49,12 +49,12 @@ clip3 = img3(top:bottom, left:right);
 clip4 = img4(top:bottom, left:right);
 
 % Calculate harris-features
-features1 = harris_detector(clip1,'segment_length',9,'k',0.05,'min_dist',50,'N',20,'do_plot',false);
-features2 = harris_detector(clip2,'segment_length',9,'k',0.05,'min_dist',50,'N',20,'do_plot',false);
-features3 = harris_detector(clip3,'segment_length',9,'k',0.05,'min_dist',50,'N',20,'do_plot',false);
-features4 = harris_detector(clip4,'segment_length',9,'k',0.05,'min_dist',50,'N',20,'do_plot',false);
+features1 = harris_detector(clip1,'tile_size',20,'segment_length',9,'k',0.1,'min_dist',10,'N',10,'do_plot',false);
+features2 = harris_detector(clip2,'tile_size',20,'segment_length',9,'k',0.1,'min_dist',10,'N',10,'do_plot',false);
+features3 = harris_detector(clip3,'tile_size',20,'segment_length',9,'k',0.1,'min_dist',10,'N',10,'do_plot',false);
+features4 = harris_detector(clip4,'tile_size',20,'segment_length',9,'k',0.1,'min_dist',10,'N',10,'do_plot',false);
 
 
-cor12 = point_correspondence(clip1,clip2,features1,features2,'window_length',25,'min_corr', 0.90,'do_plot',true)
-cor13 = point_correspondence(clip1,clip3,features1,features3,'window_length',25,'min_corr', 0.90,'do_plot',true)
-cor14 = point_correspondence(clip1,clip4,features1,features4,'window_length',25,'min_corr', 0.90,'do_plot',true)
+cor12 = point_correspondence(clip1,clip2,features1,features2,'window_length',25,'min_corr', 0.9,'do_plot',true)
+cor13 = point_correspondence(clip1,clip3,features1,features3,'window_length',25,'min_corr', 0.9,'do_plot',true)
+cor14 = point_correspondence(clip1,clip4,features1,features4,'window_length',25,'min_corr', 0.9,'do_plot',true)

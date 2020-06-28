@@ -1,23 +1,25 @@
-rgb = imread('C:\Users\Daniel\Desktop\Studium\Master\1. Semester\02 Computer Vision\Challenge\Datasets\P1E_S1\P1E_S1_C1\00001172.jpg');
+%rgb = imread('C:\Users\Daniel\Desktop\Studium\Master\1. Semester\02 Computer Vision\Challenge\Datasets\P1E_S1\P1E_S1_C1\00001172.jpg');
+rgb = imread('C:\Users\Daniel\Desktop\Studium\Master\1. Semester\02 Computer Vision\Challenge\Datasets\P1E_S1\P1E_S1_C1\00000628.jpg');
 
 I = rgb2gray(rgb);
 
 I = imadjust(I);
 
 I = sharpen_image(double(I));
-%I = imgaussfilt(double(I), 1);
+I = imgaussfilt(double(I), 1);
 I = uint8(I);
 
 %imshow(I)
 
-[Fx, Fy] = sobel_xy(I);
-gmag = Fx .^ 2 + Fy .^ 2;
-
-%gmag = imgradient(I);
-%imshow(gmag,[])
+%[Fx, Fy] = sobel_xy(I);
+%gmag = Fx .^ 2 + Fy .^ 2;
 
 
-se = strel('disk',8);
+gmag = imgradient(I, 'intermediate');
+figure
+imshow(gmag,[])
+
+se = strel('disk',5);
 Ie = imerode(I,se);
 Iobr = imreconstruct(Ie,I);
 figure
@@ -52,7 +54,7 @@ imshow(I3)
 title('Modified Regional Maxima Superimposed on Original Image')
 
 
-bw = imbinarize(Iobrcbr, 'adaptive','ForegroundPolarity','bright','Sensitivity',0.65);
+bw = imbinarize(Iobrcbr, 'adaptive','ForegroundPolarity','bright','Sensitivity',0.75);
 figure
 imshow(bw)
 title('Thresholded Opening-Closing by Reconstruction')

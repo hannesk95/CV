@@ -1,10 +1,17 @@
-rgb = imread('C:\Users\Daniel\Desktop\Studium\Master\1. Semester\02 Computer Vision\Challenge\Datasets\P1E_S1\P1E_S1_C1\00001172.jpg');
+start_frame = 555;
+imreader = ImageReader('C:\Users\Daniel\Desktop\Studium\Master\1. Semester\02 Computer Vision\Challenge\Datasets\P1E_S1', 1, 2, start_frame, 2)
 
-I = rgb2gray(rgb);
+[tensor_left, tensor_right] = imreader.next();
 
-L = watershed_segmentation(I);
+segmentation(tensor_left, tensor_right);
 
-Lrgb = label2rgb(L,'jet','w','shuffle');
-figure
-imshow(Lrgb)
-title('Colored Watershed Label Matrix')
+% N = size(tensor_left,3) / 3 - 1;
+% 
+% figure
+% image_left = tensor_left(:, :, 1:3);
+% imshow(image_left)
+% image_left = rgb2gray(image_left);
+% labels = watershed_segmentation(image_left);
+% Lrgb = label2rgb(labels,'jet','w','shuffle');
+% figure
+% imshow(Lrgb)

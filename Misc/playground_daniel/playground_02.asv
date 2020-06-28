@@ -1,16 +1,25 @@
-rgb = imread('C:\Users\Daniel\Desktop\Studium\Master\1. Semester\02 Computer Vision\Challenge\Datasets\P1E_S1\P1E_S1_C1\00001171.jpg');
+%rgb = imread('C:\Users\Daniel\Desktop\Studium\Master\1. Semester\02 Computer Vision\Challenge\Datasets\P1E_S1\P1E_S1_C1\00001172.jpg');
+rgb = imread('C:\Users\Daniel\Desktop\Studium\Master\1. Semester\02 Computer Vision\Challenge\Datasets\P1E_S1\P1E_S1_C1\00000628.jpg');
 
 I = rgb2gray(rgb);
 
+I = imadjust(I);
+%I = I .* 255;
+
+%I = sharpen_image(double(I));
+%I = imgaussfilt(double(I), 2);
+%I = uint8(I);
+
 %imshow(I)
 
-%[Fx, Fy] = sobel_xy(I);
-gmag = Fx .^ + Fy;
+[Fx, Fy] = sobel_xy(I);
+gmag = Fx .^ 2 + Fy .^ 2;
+
 
 %gmag = imgradient(I);
 %imshow(gmag,[])
 
-se = strel('disk',20);
+se = strel('disk',8);
 Ie = imerode(I,se);
 Iobr = imreconstruct(Ie,I);
 figure
@@ -53,8 +62,8 @@ title('Thresholded Opening-Closing by Reconstruction')
 D = bwdist(bw);
 DL = watershed(D);
 bgm = DL == 0;
-%imshow(bgm)
-%title('Watershed Ridge Lines)')
+imshow(bgm)
+title('Watershed Ridge Lines)')
 
 gmag2 = imimposemin(gmag, bgm | fgm4);
 L = watershed(gmag2);

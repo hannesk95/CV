@@ -9,17 +9,17 @@ I = imadjust(image);
 
 % magnify edges
 I = sharpen_image(double(I));
+I = imgaussfilt(double(I), 1);
 I = uint8(I);
 
 % Calculate magnitude of gradient
-[Fx, Fy] = sobel_xy(I);
-gmag = Fx .^ 2 + Fy .^ 2;
+gmag = imgradient(I, 'intermediate');
 
 
 %% Marker Generation
 
 % Opening-by-Reconstruction
-se = strel('disk',8);
+se = strel('disk',5);
 Ie = imerode(I,se);
 Iobr = imreconstruct(Ie,I);
 
@@ -41,7 +41,7 @@ fgm4 = bwareaopen(fgm3,20);
 I3 = labeloverlay(I,fgm4);
 
 % Mark the dark pixels as background
-bw = imbinarize(Iobrcbr, 'adaptive','ForegroundPolarity','bright','Sensitivity',0.65);
+bw = imbinarize(Iobrcbr, 'adaptive','ForegroundPolarity','bright','Sensitivity',0.7);
 
 %% Segmentation
 
