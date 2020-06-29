@@ -253,8 +253,8 @@ fprintf('draw_images\n')
 handles = guidata(figure);
 
 % Show left and right input channel
-imshow(handles.image_left, 'Parent', handles.axes_input_left);
-imshow(handles.image_right, 'Parent', handles.axes_input_right);
+imshow(handles.image_left(:, :, 1:3), 'Parent', handles.axes_input_left);
+imshow(handles.image_right(:, :, 1:3), 'Parent', handles.axes_input_right);
 
 % Calculate mask
 mask = segmentation(handles.image_left, handles.image_right);
@@ -264,7 +264,7 @@ contents = cellstr(get(handles.popup_mode,'String'));
 rendermode = contents{get(handles.popup_mode,'Value')};
 
 % Render and show output image
-image_output = render(handles.image_left, mask, handles.image_background, rendermode);
+image_output = render(handles.image_left(:, :, 1:3), mask, handles.image_background, rendermode);
 imshow(image_output, 'Parent', handles.axes_output);
 
 % Update data
@@ -281,8 +281,8 @@ handles = guidata(figure);
 [tensor_left, tensor_right, ~] = handles.imreader.next();
 
 % Store first images from tensors in buffer
-handles.image_left(:) = tensor_left(:, :, 1:3);
-handles.image_right(:) = tensor_right(:, :, 1:3);
+handles.image_left = tensor_left;
+handles.image_right = tensor_right;
 
 % Update data
 guidata(figure, handles);
@@ -298,8 +298,8 @@ handles = guidata(figure);
 [tensor_left, tensor_right, loop] = handles.imreader.next();
 
 % Store first images from tensors in buffer
-handles.image_left(:) = tensor_left(:, :, 1:3);
-handles.image_right(:) = tensor_right(:, :, 1:3);
+handles.image_left = tensor_left;
+handles.image_right = tensor_right;
 
 % Check if end of sequence reached
 if loop && ~get(handles.checkbox_loop, 'Value')
