@@ -4,9 +4,9 @@ function [mask] = segmentation(left,right)
   %% Segmentation of the image
   I = rgb2gray(left(:,:,1:3));
   labels = watershed_segmentation(I);
-  %Lrgb = label2rgb(labels,'jet','w','shuffle');
-  %figure
-  %imshow(Lrgb)
+  Lrgb = label2rgb(labels,'jet','w','shuffle');
+  figure
+  imshow(Lrgb)
   
   %% Extract movements
   
@@ -18,7 +18,7 @@ function [mask] = segmentation(left,right)
   for i = 1:N
       I_n = rgb2gray(left(:,:,(1:3) + i*3));
       features_n = harris_detector(I_n,'tile_size',20,'segment_length',9,'k',0.1,'min_dist',10,'N',10,'do_plot',false);
-      corr = point_correspondence(I,I_n,features,features_n,'window_length',25,'min_corr', 0.9,'do_plot',false);    
+      corr = point_correspondence(I,I_n,features,features_n,'window_length',25,'min_corr', 0.9,'do_plot',true);
       correspondences(i) = { corr };
   end  
 
@@ -26,7 +26,7 @@ function [mask] = segmentation(left,right)
   % in tiles between the first and following frames.
   % e.g. movements(1, 3, 1) holds the sqaured magnitude of the
   % (interpolated) movement of tile (1, 3) between frame 1 and 2.
-  tile_size = [10, 10];
+  tile_size = [15, 15];
   kx = size(I, 2) / tile_size(1);
   ky = size(I, 1) / tile_size(2);
   rx = ceil(kx) * tile_size(1) - size(I, 2) + 1;
@@ -89,14 +89,12 @@ function [mask] = segmentation(left,right)
         tile_labels(tile_labels(:) == 0) = [];
         winning_segment = mode(tile_labels(:));
         % Store movement information
-        if winning_segment ~= 0
-            n = movement_counter(winning_segment, i);
-            n = n + 1;
-            movement_counter(winning_segment, i) = n;
-            m = cell2mat( segment_movement(winning_segment, i) );
-            m(n) = m2;
-            segment_movement(winning_segment, i) = { m };
-        end
+        n = movement_counter(winning_segment, i);
+        n = n + 1;
+        movement_counter(winning_segment, i) = n;
+        m = cell2mat( segment_movement(winning_segment, i) );
+        m(n) = m2;
+        segment_movement(winning_segment, i) = { m };
     end
   end
   % Remove empty entries
@@ -107,33 +105,8 @@ function [mask] = segmentation(left,right)
       m(n+1 : end) = [];
       segment_movement(s, i) = { m };
   end
-  % Variable movement_median stores the median value of the movement
-  % magnitudes for each segment.
-  % e.g. movement_median(3, 1) holds the median value of the movement
-  % magnitudes between frame 1 and frame 2 for segment 3.
-  movement_median = zeros(N_segments, N);
-  % Variable movement_avg stores the average movement for each segment.
-  % e.g. movement_avg(12) holds the average movement of segment 12.
-  movement_avg = zeros(N_segments, 1);
-  for i = 1:N_segments
-      m2 = cell2mat(segment_movement(i, :));
-      if ~isempty(m2)
-          m = sqrt(median(m2));
-          movement_median(i, :) = m;
-          m_avg = m .* ( (1:size(m)) ^ -1 );
-          m_avg = mean(m_avg);
-          movement_avg(i) = m_avg;
-      end
-  end
   
-  foreground_labels = find(movement_avg > mean(movement_avg) * 1.75 & movement_avg > 2);
   
-  mask = ismember(labels, foreground_labels);
-  %figure
-  %imshow(mask)
-  
-  %% Dilate mask
-  se = strel('disk',10);
-  mask = imdilate(mask,se);
+  mask = zeros(size(I));
   
 end
