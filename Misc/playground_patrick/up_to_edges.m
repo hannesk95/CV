@@ -77,42 +77,57 @@ edges = edge(gray1 ,'Canny').* mask;
 %% Find dynamic correspondences, save in corDyn
 figure(7);
 [result] = render(i1,mask, 0, 'foreground');
-imshow(result * 0.5 + edges*0.5);
-hold on 
+% %imshow(result * 0.5 + edges*0.5);
+% hold on 
 th_min = 2.5;
 th_max = 40;
 selection = (vecnorm(cor12(1:2,:)-cor12(3:4,:)) > th_min) & (vecnorm(cor12(1:2,:)-cor12(3:4,:)) < th_max);
 
 corDyn = cor12(:,selection);
 corStat = cor12(:, ~selection);
-plot(cor12(1,:), cor12(2,:), 'm *');
-plot(corDyn(1,:), corDyn(2,:), 'g *');
-disp('Num features likely on foreground: ' + string(sum(selection)))
+% plot(cor12(1,:), cor12(2,:), 'm *');
+% plot(corDyn(1,:), corDyn(2,:), 'g *');
+% disp('Num features likely on foreground: ' + string(sum(selection)))
 
 
-%% Edge classification - not working yet
-corDyn2 = corDyn(1:2, :);
-corDyn2 = corDyn2';
+%% Shrink mask
 
-[B,L] = bwboundaries(edges, 'noholes');
-contours_human = zeros(1, length(B)); % Lists which contours belong to foreground
-
-
-hold on
-
-for k = 1:length(B)
-   boundary = B{k};
-   for j = 1: size(corDyn2, 1)
-      l1 = find(boundary(:, 1) == corDyn2(j, 2));
-      l2 = find(boundary(:, 2) == corDyn2(j, 1));
-      
-      if (~isempty(l1) && ~isempty(l2))
-          contours_human(j) = 1;
-          plot(boundary(:,2), boundary(:,1), 'r', 'LineWidth', 2)
-      end
-   end
-   
+for i = 1:600
+    % ===== From Left ================
+    j1 = 1;
+    while(mask(i, j1) == 0 && j1 < 800)
+       j1 = j1 + 1;
+    end
+    
+    j1 = j1-1;
+    if (j1 < 1)
+        j1 = 1;
+    end
+    
+    while(edges(i, j1) == 0 && j1 < 800)
+        j1 = j1+1;
+        mask(i, j1) = 0;
+    end
+    
+    % ========= From Right ===============
+    j2 = 800;
+    while(mask(i, j2) == 0 && j2 > j1)
+       j2 = j2 - 1;
+    end
+    
+    j2 = j2 + 1;
+    if j2 > 800
+        j2 = 800;
+    end
+    
+    while(edges(i, j2) == 0 && j2 > j1)
+        j2 = j2 - 1;
+        mask(i, j2) = 0;
+    end
 end
 
-max(contours_human)
-sum(contours_human)
+%% Show results
+
+figure(99);
+[result] = render(i1,mask, 0, 'foreground');
+imshow(result);

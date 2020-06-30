@@ -4,7 +4,7 @@ close all
 clc
 
 %% Image loading
-image_num = 7;
+image_num = 2;
 
 switch image_num
     case 1
@@ -70,49 +70,47 @@ features2 = harris_detector(gray2_masked, 'segment_length',s_L,'k',k,'min_dist',
 cor12 = point_correspondence(gray1, gray2, features1, features2, 'window_length', 25, 'min_corr', 0.90, 'do_plot', false);
 
 
-%% Find edges 
-edges = edge(gray1 ,'Canny').* mask;
-
-
 %% Find dynamic correspondences, save in corDyn
 figure(7);
-[result] = render(i1,mask, 0, 'foreground');
-imshow(result * 0.5 + edges*0.5);
+imshow(i1);
 hold on 
 th_min = 2.5;
 th_max = 40;
 selection = (vecnorm(cor12(1:2,:)-cor12(3:4,:)) > th_min) & (vecnorm(cor12(1:2,:)-cor12(3:4,:)) < th_max);
 
-corDyn = cor12(:,selection);
-corStat = cor12(:, ~selection);
-plot(cor12(1,:), cor12(2,:), 'm *');
-plot(corDyn(1,:), corDyn(2,:), 'g *');
+dynCor = cor12(:,selection);
+plot(dynCor(1,:), dynCor(2,:), 'm *');
 disp('Num features likely on foreground: ' + string(sum(selection)))
 
+%% Do Color-Based filtering
 
-%% Edge classification - not working yet
-corDyn2 = corDyn(1:2, :);
-corDyn2 = corDyn2';
+colorDelta_TH = 20;
 
-[B,L] = bwboundaries(edges, 'noholes');
-contours_human = zeros(1, length(B)); % Lists which contours belong to foreground
+mask_color = zeros(size(mask));
 
-
-hold on
-
-for k = 1:length(B)
-   boundary = B{k};
-   for j = 1: size(corDyn2, 1)
-      l1 = find(boundary(:, 1) == corDyn2(j, 2));
-      l2 = find(boundary(:, 2) == corDyn2(j, 1));
-      
-      if (~isempty(l1) && ~isempty(l2))
-          contours_human(j) = 1;
-          plot(boundary(:,2), boundary(:,1), 'r', 'LineWidth', 2)
-      end
-   end
-   
+for i = 1:20:size(i1,1)
+    disp(i)
+    for j = 1:20:size(i1,2)
+        if(mask(i,j)) % only look at points cleared by preliminary mask
+            % find closest correspondence
+            [~, index] = min(vecnorm(dynCor(1:2, :) - [j;i]));
+            c1 = squeeze(double(i1(i, j, :))./255);
+            c2 = squeeze(double(i1(dynCor(2, index), dynCor(1, index), :))./255);
+            temp = sRGB2CIEDeltaE(c1', c2','cielab');
+            
+            if(temp < colorDelta_TH)
+                plot(j, i, 'g *')
+            else
+                plot(j, i, 'r *')
+            end
+            
+        end
+    end
 end
 
-max(contours_human)
-sum(contours_human)
+title('Color-based filtering with threshold ' + string(colorDelta_TH))
+
+%% Post-Script Cleanup
+
+
+clear boxKernel cor12 d d1 d2 d3 features1 features2 gray1 gray2 image_num m_d 
