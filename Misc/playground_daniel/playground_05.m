@@ -1,5 +1,5 @@
 start_frame = 880;
-imreader = ImageReader('C:\Users\Daniel\Desktop\Studium\Master\1. Semester\02 Computer Vision\Challenge\Datasets\P1E_S1', 2, 3, start_frame, 2)
+imreader = ImageReader('C:\Users\Johan\Desktop\ChokePointData\P1E_S1', 2, 3, start_frame, 2)
 
 [tensor_left, tensor_right] = imreader.next();
 

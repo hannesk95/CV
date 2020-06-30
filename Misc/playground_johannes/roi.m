@@ -1,4 +1,4 @@
-function [person_seg_mask] = mask(left, right)
+function [person_seg_mask] = roi(left, right)
 
     %i1 = imread('00000215.jpg');
     i1 = left(:,:,1:3);

@@ -103,3 +103,4 @@ person_boundary = person_bw - person_bw_eroded;
 figure();
 imshow(person_boundary)
 
+mask_new = mask();
