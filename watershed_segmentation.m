@@ -1,57 +1,25 @@
-function Labels = watershed_segmentation(image)
+function Labels = watershed_segmentation(left,right)
 %WATERSHED_SEGMENTATION Finds segments along edges
-%   image    Grayscale input image
+%   left    Left channel tensor
+%   right   Right channel tensor
 
-%% Image Preprocessing
+%% Generate markers
+[fgm, bgm] = generate_markers(left, right);
+%I2 = labeloverlay(left(:,:,1:3),fgm);
+%figure
+%imshow(I2)
 
-% increase contrast
-I = imadjust(image);
+%% Image preprocessing
+I = left(:,:, 1:3);
+I = rgb2gray(I);
 
-% magnify edges
-I = sharpen_image(double(I));
-I = imgaussfilt(double(I), 1);
-I = uint8(I);
+%% Image segmentation
 
 % Calculate magnitude of gradient
 gmag = imgradient(I, 'intermediate');
 
-
-%% Marker Generation
-
-% Opening-by-Reconstruction
-se = strel('disk',5);
-Ie = imerode(I,se);
-Iobr = imreconstruct(Ie,I);
-
-% Opening-Closing by Reconstruction
-Iobrd = imdilate(Iobr,se);
-Iobrcbr = imreconstruct(imcomplement(Iobrd),imcomplement(Iobr));
-Iobrcbr = imcomplement(Iobrcbr);
-
-% Regional Maxima of Opening-Closing by Reconstruction
-fgm = imregionalmax(Iobrcbr);
-
-% Shrink markers by a closing followed by an erosion
-se2 = strel(ones(5,5));
-fgm2 = imclose(fgm,se2);
-fgm3 = imerode(fgm2,se2);
-
-% Remove isolated pixels
-fgm4 = bwareaopen(fgm3,20);
-I3 = labeloverlay(I,fgm4);
-
-% Mark the dark pixels as background
-bw = imbinarize(Iobrcbr, 'adaptive','ForegroundPolarity','bright','Sensitivity',0.7);
-
-%% Segmentation
-
-% Computing the "skeleton by influence zones"
-D = bwdist(bw);
-DL = watershed(D);
-bgm = DL == 0;
-
 % Compute the watershed-based segmentation
-gmag2 = imimposemin(gmag, bgm | fgm4);
+gmag2 = imimposemin(gmag, bgm | fgm);
 Labels = watershed(gmag2);
 
 end
