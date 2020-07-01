@@ -133,7 +133,7 @@ function [mask] = segmentation(left,right)
   %imshow(mask)
   
   %% Dilate mask
-  se = strel('disk',10);
+  se = strel('disk',1);
   mask = imdilate(mask,se);
   
 end
