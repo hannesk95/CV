@@ -1,18 +1,16 @@
-function Labels = watershed_segmentation(left,right)
+function Labels = watershed_segmentation(image_in)
 %WATERSHED_SEGMENTATION Finds segments along edges
 %   left    Left channel tensor
 %   right   Right channel tensor
 
 %% Generate markers
-[fgm, bgm] = generate_markers(left, right);
-I2 = labeloverlay(left(:,:,1:3),fgm);
-figure
-imshow(I2)
+[fgm, bgm] = generate_markers(image_in);
+%I = labeloverlay(image_in,fgm);
+%figure
+%imshow(I)
 
 %% Image preprocessing
-I = left(:,:, 1:3);
-I = rgb2gray(I);
-I = imgaussfilt(I, 1);
+I = rgb2gray(image_in);
 
 %% Image segmentation
 
