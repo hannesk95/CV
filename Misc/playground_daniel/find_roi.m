@@ -1,44 +1,58 @@
-function [person_seg_mask] = find_roi(left, right)
-
-    i1 = left(:,:,1:3);
-    i2 = left(:,:,4:6);
-
-    gray1 = rgb2gray(i1);
-    gray2 = rgb2gray(i2);
-
-    %% Build differences
-    d_color = i1-i2;
-    d_gray = gray1 - gray2; 
-
-    d1 = d_color(:,:,1);
-    d2 = d_color(:,:,2);
-    d3 = d_color(:,:,3);
+function [roi, top_left, bottom_right] = find_roi(left, right, tile_size, threshold)
+    N = size(left,3) / 3 - 1;
+    I1 = left(:,:, 1:3);
+    I2 = left(:,:, (1:3) + N * 3);
+    I1 = rgb2gray(I1);
+    I2 = rgb2gray(I2);
     
+    %% Find dynamic regions
+    kx = size(I1, 2) / tile_size(1);
+    ky = size(I1, 1) / tile_size(2);
+    rx = ceil(kx) * tile_size(1) - size(I1, 2) + 1;
+    ry = ceil(ky) * tile_size(2) - size(I1, 1) + 1;
+    t1 = (1 - rx / 2) : tile_size(1) : (size(I1, 2) + rx / 2 - tile_size(1));
+    t2 = (1 - ry / 2) : tile_size(2) : (size(I1, 1) + ry / 2 - tile_size(2)); 
+    ncc_matrix = zeros(length(t2), length(t1));
+    for tile_x = 1:length(t1)
+       for tile_y = 1:length(t2)
+           % calculate tile center position
+            cx = t1(tile_x);
+            cy = t2(tile_y);
+            % calculate tile edge positions
+            left = ceil(cx);
+            right = left + tile_size(1) - 1;
+            top = ceil(cy);
+            bottom = top + tile_size(2) - 1;
+            % Limit values
+            if left < 1
+                left = 1;
+            end
+            if right > size(I1, 2)
+                right = size(I1, 2);
+            end
+            if top < 1
+                top = 1;
+            end
+            if bottom > size(I1, 1)
+                bottom = size(I1, 1);
+            end
+            % Get tile windows
+            w1 = normalize_window(I1(top:bottom, left:right));
+            w2 = normalize_window(I2(top:bottom, left:right));
+            % Calculate difference
+            tr = (w1(:))' * w2(:);
+            ncc = 1/(numel(w1) - 1) * tr;
+            ncc_matrix(tile_y, tile_x) = ncc;
+       end
+    end
     
-    %% Apply Lowpass
-    n = 75;
-    boxKernel = 1/(n*n)*ones(n);
-    d1 = conv2(d1, boxKernel, 'same');
-    d2 = conv2(d2, boxKernel, 'same');
-    d3 = conv2(d3, boxKernel, 'same');
-
-    %% Create Preliminary overestimating mask
-    th = 2;
-    mask = d1>th | d2>th | d3>th;
+    if nargin < 4
+        threshold = mean(ncc_matrix(:));
+    end    
+    roi = ncc_matrix < threshold;
     
-    %% Create masked grayscale images
-    gray1_masked = gray1;
-    gray2_masked = gray2;
-
-    gray1_masked(~mask) = 0;
-    gray2_masked(~mask) = 0;
+    [top_left, bottom_right] = generate_boundarybox(roi);
     
-    labeled_image = bwlabel(gray1_masked, 8);
-    stats = regionprops(labeled_image, 'Area');
-    maxArea = max([stats.Area]);
-    idx = find([stats.Area] == maxArea);
-    person_seg_mask = ismember(labeled_image, idx);
-    
-    SE = strel('square', 20);
-    person_seg_mask = imdilate(person_seg_mask,SE);
+    top_left = top_left .* tile_size - tile_size + 1;
+    bottom_right = min(bottom_right .* tile_size, size(I1'));
 end
