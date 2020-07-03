@@ -46,7 +46,7 @@ d3 = d_color(:,:,3);
 
 
 %% Apply Lowpass
-n = 75;
+n = 100;
 boxKernel = 1/(n*n)*ones(n);
 d1 = conv2(d1, boxKernel, 'same');
 d2 = conv2(d2, boxKernel, 'same');
