@@ -22,10 +22,6 @@ function [mask] = segmentation4(left,right)
   CC = bwconncomp(I);
   
   % If there are no contours leave function
-  if CC.NumObjects == 0
-      mask = zeros(image_size);
-      return
-  end
   
   % Extract the biggest "blob"
   numPixels = cellfun(@numel,CC.PixelIdxList);
@@ -62,30 +58,24 @@ function [mask] = segmentation4(left,right)
   %% Generate mask
   mask_big = zeros(image_size);
   
-<<<<<<< HEAD
-  %% Dilate mask
-  se = strel('disk',1);
-  mask = imdilate(mask,se);
-=======
   if N_segments > 1  
-      %Lrgb = label2rgb(labels,'jet','w','shuffle');
-      %figure
-      %imshow(Lrgb * 0.3 + left(:,:,1:3) * 0.7);
+      Lrgb = label2rgb(labels,'jet','w','shuffle');
+      figure
+      imshow(Lrgb * 0.3 + left(:,:,1:3) * 0.7);
       
-      mask_small = ismember(labels, find(segment_area > 0.8)) .* mask_small;
+      mask_small = ismember(labels, find(segment_area > 0.8));
       
       % Dilate mask
       se = strel('disk', 5);
       mask_small = imdilate(mask_small,se);
       
-      %figure
-      %imshow(uint8(mask_small) .* left(:,:,1:3));
+      figure
+      imshow(uint8(mask_small) .* left(:,:,1:3));
       
       % Insert small mask into big mask
       total_translation = top_left + small_top_left - [2 2];
       mask_big(total_translation(2):total_translation(2)+size(mask_small,1)-1,total_translation(1):total_translation(1)+size(mask_small,2)-1) = mask_small;
   end       
->>>>>>> fccc4528e03317566f100c848729b8a5ee5771d4
   
   mask = mask_big;  
 end
