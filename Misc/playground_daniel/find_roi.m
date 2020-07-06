@@ -1,7 +1,4 @@
-function [roi, top_left, bottom_right] = find_roi(left, right, tile_size, threshold)
-    N = size(left,3) / 3 - 1;
-    I1 = left(:,:, 1:3);
-    I2 = left(:,:, (1:3) + N * 3);
+function [roi, top_left, bottom_right] = find_roi(I1, I2, tile_size, threshold)
     I1 = rgb2gray(I1);
     I2 = rgb2gray(I2);
     
@@ -53,6 +50,8 @@ function [roi, top_left, bottom_right] = find_roi(left, right, tile_size, thresh
     
     [top_left, bottom_right] = generate_boundarybox(roi);
     
-    top_left = top_left .* tile_size - tile_size + 1;
-    bottom_right = min(bottom_right .* tile_size, size(I1'));
+    top_left = ceil([ t1(top_left(1)), t2(top_left(2)) ]);
+    top_left = max(top_left, [1 1]);
+    bottom_right = ceil([ t1(bottom_right(1)) + tile_size(1), t2(bottom_right(2)) + tile_size(2) ]);
+    bottom_right = min(bottom_right, size(I1'));
 end
