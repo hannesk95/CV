@@ -241,6 +241,7 @@ set(handles.button_n_inc, 'Enable', 'on');
 set(handles.button_n_decr, 'Enable', 'on');
 set(handles.popup_channel_left, 'Enable', 'on');
 set(handles.popup_channel_right, 'Enable', 'on');
+set(handles.button_save, 'Enable', 'on');
 
 % Update data
 guidata(figure, handles);
@@ -533,6 +534,97 @@ function button_save_Callback(hObject, eventdata, handles)
 % hObject    handle to button_save (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% Select file path
+[file,path] = uiputfile({'*.avi'}, 'Speicherort auswählen');
+
+if ~isstr(file)
+    return;
+end
+
+filepath = fullfile(path,file);
+
+% Read left channel selection
+contents = cellstr(get(handles.popup_channel_left,'String'));
+L = str2double(contents{get(handles.popup_channel_left,'Value')});
+
+% Read right channel selection
+contents = cellstr(get(handles.popup_channel_right,'String'));
+R = str2double(contents{get(handles.popup_channel_right,'Value')});
+
+% Read other parameters for ImageReader
+N = str2double(get(handles.text_n,'String'));
+start = str2double(get(handles.text_start,'String'));
+src = get(handles.text_directory,'String');
+
+% Initialize ImageReader
+imreader = ImageReader(src, L, R, start, N);
+
+% Read rendermode selection
+contents = cellstr(get(handles.popup_mode,'String'));
+rendermode = contents{get(handles.popup_mode,'Value')};
+
+prompt = {'Wie viele Folgebilder  sollen gerendert werden (-1 für alle) ?'};
+dlgtitle = 'Anzahl Bilder';
+definput = {'-1'};
+n = inputdlg(prompt,dlgtitle,[1 40],definput);
+
+if isempty(n)
+    return;
+end
+
+set(handles.button_save, 'Enable', 'off');
+set(handles.button_change_directory, 'Enable', 'off');
+
+n = cell2mat(n);
+n = str2double(n);
+
+f = waitbar(0,'Rendere Video ...');
+set(f,'WindowStyle','modal');
+
+i = 1;
+
+% Open videowriter
+videoWriter = VideoWriter(filepath);
+open(videoWriter);
+
+while true
+    
+    if n ~= -1 && n < i
+        break;
+    end
+    
+    % Get next images
+    [tensor_left, tensor_right, loop] = imreader.next();
+    
+    % Calculate mask
+    mask = segmentation(tensor_left, tensor_right);
+
+    % Render output image
+    image_output = render(tensor_left(:, :, 1:3), mask, handles.image_background, rendermode);
+    
+    % Save video
+    writeVideo(videoWriter,image_output);  
+    
+    fprintf('Wrote frame: %d\n', i);
+    progress = i/n;
+    waitbar(max(progress, atan(i/100) / pi * 2),f,'Rendere Video ...');
+    
+    if loop == 1
+        break;
+    end
+    
+    i = i + 1;
+end
+  
+% Close videowriter
+close(videoWriter);
+
+waitbar(1,f,'Rendern abgeschlossen');
+pause(1)
+
+set(handles.button_save, 'Enable', 'on');
+set(handles.button_change_directory, 'Enable', 'on');
 
 
 % --- Executes on selection change in popup_channel_left.
