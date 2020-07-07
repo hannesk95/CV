@@ -24,10 +24,10 @@ numProcessed = 0;
 tic;
 
 %% Generate Movie
-
+loop = 0;
 while loop ~= 1
     % Get next image tensors
-    [left, right] = imreader.next();
+    [left, right, loop] = imreader.next();
 
     % Generate binary mask
     mask = segmentation(left, right);
