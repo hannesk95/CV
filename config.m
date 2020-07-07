@@ -8,7 +8,7 @@ group_number = 4;
 members = {'Hacket Franziska', 'BlÃ¼mcke Patrick', 'Muhr Florian', 'StÃ¼mke Daniel', 'Kiechle Johannes'};
 
 % Email-Address (from Moodle!):
-mail = {'franziska.hacket@tum.de', 'patrick.bluemcke@tum.de', 'daniel.stuemke@tum.de', 'f.muhr@tum.de'};
+mail = {'franziska.hacket@tum.de', 'patrick.bluemcke@tum.de', 'daniel.stuemke@tum.de', 'f.muhr@tum.de', 'johannes.kiechle@tum.de'};
 
 
 %% Setup Image Reader
