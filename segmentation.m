@@ -1,4 +1,4 @@
-function [mask] = segmentation4(left,right)
+function [mask] = segmentation(left,right)
   N = size(left,3) / 3 - 1;
   image_size = [size(left, 1) size(left, 2)];
   
@@ -62,7 +62,6 @@ function [mask] = segmentation4(left,right)
   %% Generate mask
   mask_big = zeros(image_size);
   
-<<<<<<< HEAD
   %% Dilate mask
   se = strel('disk',1);
   mask = imdilate(mask,se);
@@ -85,7 +84,6 @@ function [mask] = segmentation4(left,right)
       total_translation = top_left + small_top_left - [2 2];
       mask_big(total_translation(2):total_translation(2)+size(mask_small,1)-1,total_translation(1):total_translation(1)+size(mask_small,2)-1) = mask_small;
   end       
->>>>>>> fccc4528e03317566f100c848729b8a5ee5771d4
   
   mask = mask_big;  
 end
