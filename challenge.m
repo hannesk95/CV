@@ -9,9 +9,6 @@ config.m
 
 %% Initialize and start timer
 
-% Initialize ImageReader
-ir = ImageReader(src, L, R, start, N);
-
 % Initialize video writer if necessary
 if store
     v = VideoWriter(dst);
@@ -27,7 +24,7 @@ tic;
 loop = 0;
 while loop ~= 1
     % Get next image tensors
-    [left, right, loop] = imreader.next();
+    [left, right, loop] = ir.next();
 
     % Generate binary mask
     mask = segmentation(left, right);
