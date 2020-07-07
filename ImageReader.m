@@ -8,6 +8,10 @@ classdef ImageReader < handle
         N           % Number of consecutive successors       
         iterator    % Iterator variable for method 'next'
         loop        % loop variable for method 'next'
+        names_cell_L
+        names_cell_R
+        framesL
+        framesR
     end    
     
     methods
@@ -41,7 +45,7 @@ classdef ImageReader < handle
             end     
             
             % Check source (src) value
-            if ~(ischar(src))
+            if ~(isstring(src) || ischar(src))
                error('Data source "src" has to be a char (string) variable!'); 
             end
             
@@ -78,85 +82,91 @@ classdef ImageReader < handle
             end
          
             
-        end       
-        
-        function [left, right, loop] = next(obj)        
-           
-            start_value = obj.start;             
-            
-            if (obj.loop == 1)
-                start_value = 1;
-                loop = 0;
-                obj.start = 1;
-                obj.iterator = 0;
-                obj.loop = 0;                
-            else
-                loop = obj.loop;
-            end
-            
+             
             %Build actual data path
             if (contains(obj.src, '\'))
                 split = strsplit(obj.src, '\');
-                framesL = strcat(obj.src, '\', split{end}, '_C', int2str(obj.L));
-                framesR = strcat(obj.src, '\', split{end}, '_C', int2str(obj.R));                
+                obj.framesL = strcat(obj.src, '\', split{end}, '_C', int2str(obj.L));
+                obj.framesR = strcat(obj.src, '\', split{end}, '_C', int2str(obj.R));                
             else
                 split = strsplit(obj.src, '/');
-                framesL = strcat(obj.src, '/', split{end}, '_C', int2str(obj.L));
-                framesR = strcat(obj.src, '/', split{end}, '_C', int2str(obj.R));                
+                obj.framesL = strcat(obj.src, '/', split{end}, '_C', int2str(obj.L));
+                obj.framesR = strcat(obj.src, '/', split{end}, '_C', int2str(obj.R));                
             end
             
             %Load images directroy
-            dinfoL = dir(framesL);
-            dinfoR = dir(framesR);
+            dinfoL = dir(obj.framesL);
+            dinfoR = dir(obj.framesR);
             temp_names_cell_L = {dinfoL.name};
             temp_names_cell_R = {dinfoR.name};
             
-            %names_cell_L = zeros(1, length(find(contains(temp_names_cell_R, 'jpg'))));
-            %names_cell_R = zeros(1, length(find(contains(temp_names_cell_R, 'jpg'))));
             
             %Prepare name cells with image names only
-            names_cell_L = {};
-            names_cell_R = {};
+            obj.names_cell_L = {};
+            obj.names_cell_R = {};
             
             j = 1;
             for i = 1:length(temp_names_cell_L)
                if (contains(temp_names_cell_L{i}, 'jpg'))                  
-                  names_cell_L{j} = temp_names_cell_L{i}; 
-                  names_cell_R{j} = temp_names_cell_R{i};
+                  obj.names_cell_L{j} = temp_names_cell_L{i}; 
+                  obj.names_cell_R{j} = temp_names_cell_R{i};
                   j = j + 1;
                end                   
-            end           
+            end       
             
-            % Load first image into left and right image tensors
-            temp_left = importdata(strcat(framesL, '/', names_cell_L{start_value+obj.iterator}));            
-            left = temp_left;
-            temp_right = importdata(strcat(framesR, '/', names_cell_R{start_value+obj.iterator}));            
-            right = temp_right;            
-            
-            % Condition: Not enough images avialable
-            if (start_value > length(names_cell_L))
+            % Error Check
+            if (obj.start > length(obj.names_cell_L))
                 error('Start value is bigger than entries available in the dataset, please choose a smaller value');            
-            elseif (abs(start_value - length(names_cell_L)) < obj.N)
-                num_images = abs(start_value - length(names_cell_L));
-                obj.loop = 1;
-                loop = 1;
-            else
-                num_images = obj.N;
             end
             
+        end       
+        
+        function [left, right, loop] = next(obj)        
+            
+             n = obj.N;
+             start_value = obj.start;
+             counter     = obj.iterator;
+ 
+            if start_value + counter + n > length(obj.names_cell_L)
+                if n > 1
+                    n = n - 1;
+                    obj.start = 1;
+                    obj.iterator = 0;
+                    obj.loop = 1; 
+                else
+                    obj.start = 1;
+                    obj.iterator = 0;
+                    obj.loop = 1;
+                    % Set return variables
+                    loop = 1;
+                    left = importdata(strcat(obj.framesL, '/', obj.names_cell_L{end}));
+                    left = cat(3, left, left);
+                    right = importdata(strcat(obj.framesL, '/', obj.names_cell_R{end}));
+                    right = cat(3, right, right);
+                    return;
+                end
+            end
+
+            % Load first image into left and right image tensors
+            temp_left = importdata(strcat(obj.framesL, '/', obj.names_cell_L{start_value+counter}));            
+            left = temp_left;
+            temp_right = importdata(strcat(obj.framesR, '/', obj.names_cell_R{start_value+counter}));            
+            right = temp_right;
+
             % Load consecutive successors into left and right image tensors
-            for i = 1:num_images
-                temp_left = importdata(strcat(framesL, '/', names_cell_L{start_value+i+obj.iterator}));
+            for i = 1:n
+                temp_left = importdata(strcat(obj.framesL, '/', obj.names_cell_L{start_value+counter+i}));
                 left = cat(3, left, temp_left);
-                temp_right = importdata(strcat(framesR, '/', names_cell_R{start_value+i+obj.iterator}));
+                temp_right = importdata(strcat(obj.framesR, '/', obj.names_cell_R{start_value+counter+i}));
                 right = cat(3, right, temp_right);
             end            
-            
+
             %Increment iterator            
             obj.iterator = obj.iterator + 1;           
+            
+            % Set loop value
+            loop = obj.loop;
             
         end
     end
 end
-
-
