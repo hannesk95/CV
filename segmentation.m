@@ -65,7 +65,7 @@ function [mask] = segmentation(left,right)
   %% Dilate mask
   se = strel('disk',1);
   mask = imdilate(mask,se);
-=======
+
   if N_segments > 1  
       %Lrgb = label2rgb(labels,'jet','w','shuffle');
       %figure
