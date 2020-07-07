@@ -41,7 +41,7 @@ classdef ImageReader < handle
             end     
             
             % Check source (src) value
-            if ~(ischar(src))
+            if ~(isstring(src) || ischar(src))
                error('Data source "src" has to be a char (string) variable!'); 
             end
             
@@ -158,5 +158,3 @@ classdef ImageReader < handle
         end
     end
 end
-
-
