@@ -9,6 +9,9 @@ function ROIs = find_roi(tensor_l, tensor_r, scaling_factor, do_plot)
     
     % If we want to extend this function to return more than 1 ROI
     max_rois = 1;
+    if N == 0
+        max_rois = 0;
+    end
     % ROIs contains { N x 1 is empty (logical), 2 x 2 x N boundary_box, 2 x n x N contour points }
     % for each ROI
     ROIs = cell(max_rois, 3);
@@ -20,9 +23,11 @@ function ROIs = find_roi(tensor_l, tensor_r, scaling_factor, do_plot)
         I1 = tensor_l(:,:,i);
         I2 = tensor_l(:,:,i+1);
         
+        % Adjust brightness
         I1 = I1 - sqrt(var(double(I1(:))));
         I2 = I2 - sqrt(var(double(I2(:))));
         
+        % Calculate cross correlation between images
         tile_w = 10;
         tile_h = 10;
         ncc_matrix = correlation(I1,I2, [tile_w tile_h]);
@@ -100,4 +105,3 @@ function ROIs = find_roi(tensor_l, tensor_r, scaling_factor, do_plot)
         
     end
 end
-
