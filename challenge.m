@@ -1,23 +1,56 @@
 %% Computer Vision Challenge 2020 challenge.m
+clear;
+close all;
+clc;
 
-%% Start timer here
 
+%% Configuration
+config.m
+
+%% Initialize and start timer
+
+% Initialize ImageReader
+ir = ImageReader(src, L, R, start, N);
+
+% Initialize video writer if necessary
+if store
+    v = VideoWriter(dst);
+end
+
+% initialize image counter
+numProcessed = 0;
+
+% Start timer
+tic;
 
 %% Generate Movie
 
 while loop ~= 1
-  % Get next image tensors
+    % Get next image tensors
+    [left, right] = imreader.next();
 
-  % Generate binary mask
-
-  % Render new frame
+    % Generate binary mask
+    mask = segmentation(left, right);
+    
+    % Render new frame
+    movie = render(left,mask, backgroundImage, renderMode);
+    
+    % Write new frame to movie if necessary
+    if store
+        writeVideo(v,movie);
+    end
+    
+    numProcessed = numProcessed + 1;
 end
 
 %% Stop timer here
-elapsed_time = 0;
+elapsed_time = toc;
+disp('Elapsed time: ' + string(elapsed_time) + '(for ' + string(numProcessed) + ' frames)');
 
 
-%% Write Movie to Disk
-if store
-  %v = VideoWriter(dst,'Motion JPEG AVI');
-end
+%% Cleanup
+
+% Write Movie to Disk if necessary
+close(v);
+
+clearvars -except movie group number members mail 
