@@ -93,7 +93,7 @@ function ROIs = find_roi(tensor_l_rgb, tensor_l_scaled_gray, scaling_factor, do_
 
             pts = pts(:,labels == idx_foreground);
             pts3d = pts3d(:,labels == idx_foreground);
-            [core, border, noise] = simple_dbscan(pts3d(1:2,:),0.15,20);        
+            [core, border, noise] = simple_dbscan(pts3d(1:2,:),0.1,4);        
 
             pts_x = pts(1,[core border]);
             pts_y = pts(2,[core border]);
@@ -150,7 +150,7 @@ function ROIs = find_roi(tensor_l_rgb, tensor_l_scaled_gray, scaling_factor, do_
 
 
             % Contour points
-            contour = boundary(pts2(1,:)', pts2(2,:)', 1);              
+            contour = boundary(pts2(1,:)', pts2(2,:)', 0.5);              
             contour_points = [pts2(1,contour); pts2(2,contour)];
         
             n_rois = n_rois + 1;
