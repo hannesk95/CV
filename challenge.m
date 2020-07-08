@@ -1,9 +1,11 @@
 %% Computer Vision Challenge 2020 challenge.m
+
 clear;
 close all;
 clc;
 
 %% Start configuration
+
 config
 
 %% Initialization and start timer
@@ -21,6 +23,7 @@ numProcessed = 0;
 tic;
 
 %% Generate Movie
+
 loop = 0;
 while loop ~= 1
     % Get next image tensors
@@ -41,6 +44,7 @@ while loop ~= 1
 end
 
 %% Stop timer here
+
 elapsed_time = toc;
 disp('Elapsed time: ' + string(elapsed_time) + '(for ' + string(numProcessed) + ' frames)');
 

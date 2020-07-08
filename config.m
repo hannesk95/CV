@@ -12,36 +12,40 @@ mail = {'franziska.hacket@tum.de', 'patrick.bluemcke@tum.de', 'daniel.stuemke@tu
 
 
 %% Setup Image Reader
-% Specify Scene Folder
-src = "C:\Users\Johan\Desktop\ChokePointData\P1E_S1";
 
-% Select Cameras
+% Specify scene folder
+src = "Path/to/my/ChokePoint/P1E_S1";
+
+% Select left & right cameras
 L = 1;
 R = 2;
 
-% Choose a start point
-start = 2200;
+% Choose an image starting point
+start = 1;
 
-% Choose the number of succseeding frames
+% Choose the number of succeeding frames
 N = 2;
 
+% Create image reader object
 ir = ImageReader(src, L, R, start, N);
 
-
 %% Output Settings
-% Output Path
-dst = "output.avi";
+
+% Specify output path and name
+dst = "./output.avi";
 
 %% Load Virual Background
-% [INFO]: If virtual background is aspired, allocate intended background-
+
+% [INFO]: If virtual background is wanted, allocate desired background-
 % image to 'bg' variable and replace rendering mode below to 'substitute'.
-% Otherwise for person segmentation only : 'bg' = 0 with rendering ...
-% 'mode' = foreground
+% Otherwise for person segmentation only : 'bg' = 0 and select 
+% rendering 'mode' = foreground
 
 bg = 0;
 % bg = imread("Path\to\my\virtual\background")
 
 %% Select rendering mode
+
 % Possible modes: foreground, background, overlay, substitute
 mode = "foreground";
 
