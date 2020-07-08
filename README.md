@@ -1,10 +1,10 @@
-Diese README Datei beschreibt schrittweise wie das vorliegende Programm ausgeführt werden muss um dieses ordnungsgemäß zu starten. 
+Diese README Datei beschreibt schrittweise, wie das vorliegende Programm ausgeführt werden muss um dieses ordnungsgemäß zu starten. 
 Desweiteren ist hier auch aufgelistet welche Zusatzmodule (Libraries) für eine erfolgreiche Ausführung notwendig sind, und welche 
 Matlab Versionen erfolgreich getestet wurden. 
 
 [INFO]: Getestete Matlab Release Versionen: R2019a, R2020a
 
-Auflistung Notwendiger Zusatzmodule:
+Auflistung notwendiger Matlab Zusatzmodule:
 - Computer Vision Toolbox
 - Image Processing Toolbox
 
@@ -19,8 +19,11 @@ Start des Programms:
 	
 	oder
 
-1. Bearbeiten der config.m Datei -> Pfad Änderung
-2. Aufruf der challenge.m Datei
+1. 	Anpassung der config.m Datei
+1.1.	Spezifikation des Szenen Ordners
+1.2.	Auswahl der Kameras für links und rechts
+1.3.	Start Bild auswählen
+2. 	Aufruf der challenge.m Datei
 
 
 
