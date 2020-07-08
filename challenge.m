@@ -5,13 +5,14 @@ clc;
 
 
 %% Configuration
-config.m
+config
 
 %% Initialize and start timer
 
 % Initialize video writer if necessary
 if store
     v = VideoWriter(dst);
+    open(v);
 end
 
 % initialize image counter
@@ -30,7 +31,7 @@ while loop ~= 1
     mask = segmentation(left, right);
     
     % Render new frame
-    movie = render(left,mask, backgroundImage, renderMode);
+    movie = render(left(:,:,1:3),mask, bg, mode);
     
     % Write new frame to movie if necessary
     if store
@@ -48,6 +49,7 @@ disp('Elapsed time: ' + string(elapsed_time) + '(for ' + string(numProcessed) + 
 %% Cleanup
 
 % Write Movie to Disk if necessary
-close(v);
-
+if store
+    close(v);
+end
 clearvars -except movie group number members mail 
