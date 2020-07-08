@@ -20,7 +20,7 @@ function foreground_mask = generate_mask(tensor_l, rois, do_plot)
         contour_point = rois{i , 2};
             
             
-        %% Extract image area of ROI
+        %% Get Image of ROI
         top_left = round(boundary_box(1,:)) - [padding_h padding_v];
         top_left = max(top_left, [1 1]);
         bottom_right = round(boundary_box(2,:)) + [padding_h padding_v];
@@ -32,16 +32,17 @@ function foreground_mask = generate_mask(tensor_l, rois, do_plot)
             figure
             subplot(2,2,1);
             imshow(I1_detail);
-            title('Region of Interest')
         end
             
-        %% Generate boundary mask inside of ROI
+        %% Generate boundary mask
         mask = zeros(size(I1_detail));
         if ~isempty(contour_point)
             top_left = boundary_box(1,:) - [padding_h padding_v];
             top_left = max(top_left, [1 1]);
             contour_point_0 = contour_point - top_left';
             mask = roipoly(mask,contour_point_0(1,:)',contour_point_0(2,:)');
+            %se = strel('disk', 5);
+            %mask = imdilate(mask,se); 
         else
             % No contour points provided, use generic ellipse
             mask = generate_ellipse(size(mask,2),size(mask,1));
@@ -50,13 +51,12 @@ function foreground_mask = generate_mask(tensor_l, rois, do_plot)
         if do_plot
             subplot(2,2,2);
             imshow(uint8(mask) * 255 * 0.3 + I1_detail * 0.7);
-            title('Over-approximated mask')
         end
             
         %% Perform watershed segmentation
         labels = watershed_segmentation(I1_detail);    
          
-        %% Calculate relative area of each segment inside the over-approximated mask
+        %% Check which segments are (mostly) inside of the mask
         N_segments = max(labels(:));
         segment_area = zeros(1, N_segments);
         for k = 1:N_segments
@@ -69,7 +69,6 @@ function foreground_mask = generate_mask(tensor_l, rois, do_plot)
             Lrgb = label2rgb(labels,'jet','w','shuffle');
             subplot(2,2,3);
             imshow(Lrgb - uint8(~mask) * 150);
-            title('Watershed segmentation')
         end
             
         %% Weight segments with their area inside the mask
@@ -78,7 +77,6 @@ function foreground_mask = generate_mask(tensor_l, rois, do_plot)
             segment_idx = labels(:) == k;
             mask_weighted(segment_idx) = exp(1 - 1 / (segment_area(k) ));
         end 
-        % Give central pixels a stronger weight
         mask_weighted = mask_weighted .* generate_weighting(size(mask,2), size(mask,1));
          
         %% Add weighted mask to foreground mask
@@ -96,7 +94,6 @@ function foreground_mask = generate_mask(tensor_l, rois, do_plot)
         figure
         h = surf(foreground_mask);
         set(h,'LineStyle','none')
-        title('Accumulated segment weights')
     end
     
     %% Binarize foreground mask

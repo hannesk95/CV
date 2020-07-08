@@ -151,7 +151,7 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
             contour = boundary(pts2(1,:)', pts2(2,:)', 1);              
             contour_points = [pts2(1,contour); pts2(2,contour)];
         
-            % Add region of Interest to RIO array
+            % Add region of Interest to ROI array
             n_rois = n_rois + 1;
             ROIs(n_rois, :) = { boundary_box, contour_points };
             
