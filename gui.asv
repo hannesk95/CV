@@ -176,7 +176,6 @@ for i = 1:numel(callback_arr)
 end
 
 
-% --- Sanitizes popup_channel_right input.
 function ret = sanitize_popup_channel_right(figure)
 fprintf('sanitize_popup_channel_right\n')
 handles = guidata(figure);
@@ -190,33 +189,19 @@ contents = cellstr(get(handles.popup_channel_right,'String'));
 R = str2double(contents{get(handles.popup_channel_right,'Value')});
 
 if R == L
-    msgbox('Linker und rechter Kanal müssen sich unterscheiden!');    
-    set(handles.popup_channel_right, 'Value', 2);
-    guidata(figure, handles);
 end
 
+guidata(figure, handles);
 ret = true;
 
 
-% --- Sanitizes popup_channel_left input.
 function ret = sanitize_popup_channel_left(figure)
 fprintf('sanitize_popup_channel_left\n')
 handles = guidata(figure);
 
-% Read left channel selection
-contents = cellstr(get(handles.popup_channel_left,'String'));
-L = str2double(contents{get(handles.popup_channel_left,'Value')});
 
-% Read right channel selection
-contents = cellstr(get(handles.popup_channel_right,'String'));
-R = str2double(contents{get(handles.popup_channel_right,'Value')});
 
-if R == L
-    msgbox('Linker und rechter Kanal müssen sich unterscheiden!');    
-    set(handles.popup_channel_left, 'Value', 1);
-    guidata(figure, handles);
-end
-
+guidata(figure, handles);
 ret = true;
 
 
