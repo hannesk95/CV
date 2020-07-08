@@ -9,7 +9,6 @@ Auflistung Notwendiger Zusatzmodule:
 - Image Processing Toolbox
 
 Start des Programms:
-<<<<<<< HEAD
 1. 	Aufruf: start_gui
 1.1.	Auswahl des Szenenordnerpfads
 1.2. 	Auswahl des Hintergrundbildes
@@ -26,8 +25,3 @@ Start des Programms:
 
 
 
-=======
-1. [...]
-2. [...]
-3. [...]
->>>>>>> 68bfe38be569d471e1c81f8a80da8f3315105500
