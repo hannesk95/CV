@@ -33,8 +33,7 @@ ir = ImageReader(src, L, R, start, N);
 dst = "output.avi";
 
 % Load Virual Background
-% [INFO]: If virtual background is aspired, allocate intended background
-% image to 'bg' variable and replace mode to 'substitute' below. 
+% [INFO]: If virtual background is aspired, allocate 'bg' variable 
 bg = 0;
 % bg = imread("Path\to\my\virtual\background")
 
