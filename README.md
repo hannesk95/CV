@@ -1,15 +1,13 @@
 Diese README Datei beschreibt schrittweise wie das vorliegende Programm ausgeführt werden muss um dieses ordnungsgemäß zu starten. 
-Desweiteren ist hier auch aufgelistet welche Zusatzmodule (Libraries) für eine erfolgreiche Ausführung notwendig sind, und unter welchen 
-Matlab Release das Programm getestet wurde. 
+Desweiteren ist hier auch aufgelistet welche Zusatzmodule (Libraries) für eine erfolgreiche Ausführung notwendig sind. 
 
-[INFO]: Getestete lauffähige Matlab Versionen: R2019a, R2020a
-
-Auflistung notwendiger Zusatzmodule:
-- Computer Vision Toolbox
-- Image Processing Toolbox
-
+Auflistung Notwendiger Zusatzmodule:
+- Vision Toolbox
+- [...]
+- [...]
 
 Start des Programms:
+<<<<<<< HEAD
 1. 	Aufruf: start_gui
 1.1.	Auswahl des Szenenordnerpfads
 1.2. 	Auswahl des Hintergrundbildes
@@ -25,3 +23,8 @@ Start des Programms:
 
 
 
+=======
+1. [...]
+2. [...]
+3. [...]
+>>>>>>> 65078dc4f253191bb4c3237e61ce9b0a4adbde0a

@@ -16,31 +16,35 @@ function ROIs = find_roi(tensor_l_rgb, tensor_l_scaled_gray, scaling_factor, do_
      
     
     % Try to detect people in image
-    if false%n_rois == 0
-        
-        % Extract first rgb image in original size
-        I1 = tensor_l_rgb(:,:,1:3);      
-
-        detector = peopleDetectorACF;
-
-        [bounding_boxes,scores] = detect(detector,I1);
-
-        for i = 1:length(scores)
-            n_rois = n_rois + 1;
-
-            boundary_box = [ bounding_boxes(i,1), bounding_boxes(i,2); ...
-                    bounding_boxes(i,1) + bounding_boxes(i,3), bounding_boxes(i,2) + bounding_boxes(i,4) ];
-
-            contour_points = zeros(2,0);
-
-            ROIs(n_rois, :) = { boundary_box, contour_points };
-
-            if n_rois == max_rois
-                return;
-            end
-        end
-        
-    end
+%     if true%n_rois == 0
+%         
+%         % Extract first rgb image in original size
+%         I1 = tensor_l_rgb(:,:,1:3);      
+% 
+%         detector = peopleDetectorACF;
+% 
+%         [bounding_boxes,scores] = detect(detector,I1);
+% 
+%         for i = 1:length(scores)
+%             if scores(i) < 60
+%                 continue;
+%             end
+%             
+%             n_rois = n_rois + 1;
+% 
+%             boundary_box = [ bounding_boxes(i,1), bounding_boxes(i,2); ...
+%                     bounding_boxes(i,1) + bounding_boxes(i,3), bounding_boxes(i,2) + bounding_boxes(i,4) ];
+% 
+%             contour_points = zeros(2,0);
+% 
+%             ROIs(n_rois, :) = { boundary_box, contour_points };
+% 
+%             if n_rois == max_rois
+%                 return;
+%             end
+%         end
+%         
+%     end
     
     % If no people found try 2nd approach
     if N > 0 && n_rois == 0
