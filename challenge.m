@@ -3,11 +3,10 @@ clear;
 close all;
 clc;
 
-
-%% Configuration
+%% Start configuration
 config
 
-%% Initialize and start timer
+%% Initialization and start timer
 
 % Initialize video writer if necessary
 if store
@@ -52,4 +51,4 @@ disp('Elapsed time: ' + string(elapsed_time) + '(for ' + string(numProcessed) + 
 if store
     close(v);
 end
-clearvars -except movie group number members mail 
+clearvars -except movie group_number members mail 
