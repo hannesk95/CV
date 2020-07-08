@@ -1,4 +1,5 @@
 function [tensor_l_out, tensor_l_scaled, scaling_factor] = prepare_images(tensor_l)
+  % Determine number of images per tensor and their with and height
   N = size(tensor_l,3) / 3;
   img_width = size(tensor_l, 2);
   img_height = size(tensor_l, 1);
