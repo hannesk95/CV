@@ -1,11 +1,11 @@
 %% Computer Vision Challenge 2020 config.m
 
-%% General Settings
+%% Generall Settings
 % Group number:
 group_number = 4;
 
 % Group members:
-members = {'Hacket Franziska', 'Bluemcke Patrick', 'Muhr Florian', 'Stuemke Daniel', 'Kiechle Johannes'};
+members = {'Hacket Franziska', 'BlÃ¼mcke Patrick', 'Muhr Florian', 'StÃ¼mke Daniel', 'Kiechle Johannes'};
 
 % Email-Address (from Moodle!):
 mail = {'franziska.hacket@tum.de', 'patrick.bluemcke@tum.de', 'daniel.stuemke@tum.de', 'f.muhr@tum.de', 'johannes.kiechle@tum.de'};
@@ -13,17 +13,17 @@ mail = {'franziska.hacket@tum.de', 'patrick.bluemcke@tum.de', 'daniel.stuemke@tu
 
 %% Setup Image Reader
 % Specify Scene Folder
-src = "../ChokePoint/P1E_S1";
+src = "Path/to/my/ChokePoint/P1E_S1";
 
 % Select Cameras
 L = 1;
 R = 2;
 
 % Choose a start point
-start = 2270;
+start = 1;
 
 % Choose the number of succseeding frames
-N = 2;
+N = 3;
 
 ir = ImageReader(src, L, R, start, N);
 
@@ -32,11 +32,11 @@ ir = ImageReader(src, L, R, start, N);
 % Output Path
 dst = "output.avi";
 
-% Load Virtual Background
-bg = imread("../Background.jpg");
+% Load Virual Background
+bg = 0;
+% bg = imread("Path\to\my\virtual\background")
 
-% Select rendering mode: 'foreground', 'background', 'substitute' or
-% 'overlay'
+% Select rendering mode
 mode = "substitute";
 
 % Store Output?

@@ -12,6 +12,10 @@ function [result] = render(frame,mask, bg, mode)
 % - 'background' - Set foreground black
 % - 'overlay' - Set background and foreground to different colors
 % - 'substitute' - Use rgb-image passed in bg as background
+% - 'video' - replace background with a video (passed as bg), first frame
+%   of video will be used in result, the entire video is directly saved as
+%   bg_replaced_yyyy_MM_dd_hh_mm_ss_uuu.avi in current working folder where uuu: Milliseconds, ss:
+%   Second, mm: Minute, hh: hour, dd: day, MM: Month, yyyy: Year
 % result: The resulting image, 600x800x3, [0,1]
 
 %% Convert frame to double, [0,1] if not already double
@@ -57,6 +61,28 @@ switch mode
         for i = 1:3 % For some reason it does not seem to work without loop (with 600x800x3-Mask, R2017b)
             result(:, :, i) = frame(:, :, i) .* mask + ~mask.*bg(:, :, i);
         end
+	case 'video'
+        % TODO - Bonus
+        % get number of frames
+        numFrames = size(bg, 4);
+        
+        % Create name - TODO
+        c = clock;
+        name = 'bg_replaced_' + string(c(1)) + '_' + string(c(2)) + '_' + string(c(3)) + '_' + string(c(4)) + '_' + string(c(5)) + '_' +  string(floor(c(6))) + '_' + string(round((c(6)-floor(c(6)))*1000));
+        name = squeeze(name);
+        % Create frames and save them 
+        v = VideoWriter(name + '.avi');
+        open(v);
+        
+        result = render(frame, mask, squeeze(bg(:, :, :, 1)), 'substitute');
+        writeVideo(v,result);
+        
+        for i = 2:numFrames
+            videoFrame = render(frame, mask, squeeze(bg(:, :, :, i)), 'substitute'); % getframe(gcf);
+            writeVideo(v,videoFrame);
+        end
+        close(v);
+        
     otherwise
         % Notify user of unknown mode
         warning('Unknown mode, thus result is unaltered image')
