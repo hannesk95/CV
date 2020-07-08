@@ -1,6 +1,0 @@
-function mask = generate_weighting(width, height)
-    parabel1 = (linspace(0, 1, height) - 0.5) .^ 2;
-    parabel2 = %(linspace(0, 1, width) - 0.5) .^ 2;    
-    mask = (1 - (parabel1' + parabel2)) .^ 2;
-end
-
