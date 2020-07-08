@@ -1,5 +1,5 @@
-function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
-    if nargin < 3
+function ROIs = find_roi(tensor_l_rgb, tensor_l_scaled_gray, scaling_factor, do_plot)
+    if nargin < 4
         do_plot = false;
     end
 
@@ -72,7 +72,6 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
                 I(labels == idx_foreground) = 1;
                 subplot(1,2,1)
                 imshow(I)
-                title('Detected foreground tiles')
             end
 
             % Keep only the tile positions of foreground tiles
@@ -93,7 +92,6 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
                 I(sub2ind(size(I),pts_x(:),pts_y(:))) = 1;
                 subplot(1,2,2)
                 imshow(I)
-                title('Detected foreground tiles w.o. outliers')
             end
 
             % Add the detected foreground tiles to the storeage
@@ -105,11 +103,9 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
         I(sub2ind(size(I),pts_all(1,:),pts_all(2,:))) = 1;
         
         if do_plot
-            % Plot the accumulated foreground tiles image
             figure
             subplot(1,2,1)
             imshow(I)
-            title('All detected foreground tiles w.o. outliers')
         end
         
         
@@ -118,10 +114,8 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
         I = imclose(I, se);
 
         if do_plot
-            % Plot the connected tiles
             subplot(1,2,2)
             imshow(I)
-            title('Foreground tiles after closing')
         end
 
         % Find countours around "blobs"
@@ -136,7 +130,6 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
             pixels = CC.PixelIdxList{idx};
             [tile_rows, tile_cols] = ind2sub(size(I), pixels');
 
-            % Convert from tile positions back to pixel positions
             pts2 = [tile_cols * tile_w; tile_rows * tile_h] - [tile_w / 2; tile_h / 2];
 
             % Scale to original size
@@ -151,13 +144,13 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
             contour = boundary(pts2(1,:)', pts2(2,:)', 1);              
             contour_points = [pts2(1,contour); pts2(2,contour)];
         
-            % Add region of Interest to RIO array
             n_rois = n_rois + 1;
             ROIs(n_rois, :) = { boundary_box, contour_points };
             
         end
     
-    end             
+    end   
+          
     
     % Remove unused ROIs
     ROIs = ROIs(1:n_rois,:);

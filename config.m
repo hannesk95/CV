@@ -24,7 +24,7 @@ R = 2;
 start = 1;
 
 % Choose the number of succeeding frames
-N = 2;
+N = 3;
 
 % Create image reader object
 ir = ImageReader(src, L, R, start, N);

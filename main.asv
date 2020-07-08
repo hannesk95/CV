@@ -1,4 +1,4 @@
-start_frame = 961;
+start_frame = 960;
 N = 3;
 imreader = ImageReader('C:\Users\Daniel\Desktop\Studium\Master\1. Semester\02 Computer Vision\Challenge\Datasets\P1E_S1', 1, 3, start_frame, N)
 reader_time = 0;
@@ -11,8 +11,8 @@ for i = 1:1
     
     tic    
     [tensor_l_out, tensor_l_scaled, scaling_factor] = prepare_images(tensor_left);
-    rois = find_roi(tensor_l_scaled, scaling_factor, true);
-    fgm = generate_mask(tensor_l_out, rois, true);    
+    rois = find_roi(tensor_l_scaled, scaling_factor, false);
+    fgm = generate_mask(tensor_l_out, rois, false);    
     segm_time = segm_time + toc;
 end
 
