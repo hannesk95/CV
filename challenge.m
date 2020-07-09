@@ -12,7 +12,7 @@ config
 
 % Initialize video writer if necessary
 if store
-    v = VideoWriter(dst);
+    v = VideoWriter(dest);
     open(v);
 end
 

@@ -1,4 +1,4 @@
-function [result] = render(frame,mask, bg, mode)
+function [result] = render(frame,mask, bg, render_mode)
 %RENDER Replaces, depending on mode, the background or foreground (or both) of variable frame
 %with sth. different (also specified by mode)
 % frame: [0,1], 3-channel, 600x800 image 
@@ -26,7 +26,7 @@ end
 
 %% Alter image
 result = zeros(size(frame));
-switch mode
+switch render_mode
 	case 'foreground' % Set background black
         for i = 1:3 % For some reason it does not seem to work without loop (with 600x800x3-Mask, R2017b)
             result(:, :, i) = frame(:, :, i) .* mask;
