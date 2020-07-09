@@ -15,7 +15,7 @@ Start des Programms (2 Möglichkeiten):
 1.1.	Auswahl des Szenenordnerpfads
 1.2. 	Auswahl des 'virtuellen' Hintergrundbildes (wenn gewünscht)
 1.3. 	Auswahl der Kamera für linken und rechten Kanal über Dropdown Menü
-1.4. 	Auswahl der Tensorgröße (Anzahl der Nachfolgebilder N, unser Vorschlag: Tensorgröße = 2)
+1.4. 	Auswahl der Tensorgröße (Anzahl der Nachfolgebilder N, unser Vorschlag: Tensorgröße = 3)
 1.5. 	Auswahl des Start Frames ab dem das Programm startet
 1.6.	Auswahl des Renderingmodus
 	- foreground: Hintergrund wird ausgeblendet und Person (Fordergrund) ist sichtbar.
