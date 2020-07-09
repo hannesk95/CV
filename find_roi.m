@@ -18,111 +18,92 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
     if N > 0 
         
         % Extract first gray image in scaled size
-        I1 = tensor_l_scaled_gray(:,:,1);  
-
-        % Adjust brightness
-        I1 = I1 - sqrt(var(double(I1(:))));
+        I1 = tensor_l_scaled_gray(:,:,1); 
 
         % Storeage for foreground tiles
         pts_all = [];
 
         % NCC tile size
-        tile_w = 10;
-        tile_h = 10;
+        tile_w = 20;
+        tile_h = 20;
 
         for i = 1:N
             
             % Extract consecutive image
             I2 = tensor_l_scaled_gray(:,:,i+1);
 
-            % Adjust brightness
-            I2 = I2 - sqrt(var(double(I2(:))));
-
             % Calculate cross correlation between images
             ncc_matrix = correlation(I1,I2, [tile_w tile_h]);
             
-            % Get the row and column of every tile in the ncc matrix
-            [rows, cols] = ind2sub(size(ncc_matrix), 1:numel(ncc_matrix));
-            pts = [rows; cols];
-            
-            % Add the ncc value as 3rd dimension to every point and
-            % normalize the value ranges
-            pts3d = [rows / size(ncc_matrix, 1);cols / size(ncc_matrix, 1);ncc_matrix(:)'];        
+            % Store ncc values as vector
+            ncc_values = ncc_matrix(:)';      
 
-            % Cluster points based on their 3d position into two clusters,
-            % use two initial codebook vectors centered in x/y direction
-            % and laying at the edges of the z directions
-            [labels,codebook] = simple_k_means(pts3d, 2, [0.5,0.5;0.5,0.5;-1,1], 0, 10 );   
+            % Cluster points based on their ncc values into k clusters
+            k = 5;
+            ncc_min = min(ncc_values);
+            ncc_max = max(ncc_values);            
+            [labels,codebook] = simple_k_means(ncc_values, k, linspace(ncc_min,ncc_max,k), 0, 50 );    
             
-            % The cluster which has the smallest mean in the 3rd dimension
-            % (ncc value dimension) is assumed to be foreground
-            [ncc_foreground, idx_foreground] = min(codebook(3,:));
+            % Clusters with small ncc are assumed to be foreground
+            idx_foreground = 1:floor(k/2);
             
-            if ncc_foreground > 0.25
+            if codebook(idx_foreground(end)) > 0.35
                 % The small correlation cluster still has a relatively
                 % high correlation, its probably shadows or light
                 % flickering
                 idx_foreground = 0;
             end
             
+            % Draw foreground tiles into binary image
+            I = zeros(size(ncc_matrix));
+            I(ismember(labels,idx_foreground)) = 1;
+            
             if do_plot
                 % Plot the detected foreground tiles
-                figure
-                I = zeros(size(ncc_matrix));
-                I(labels == idx_foreground) = 1;
+                figure                
                 subplot(1,2,1)
                 imshow(I)
                 title('Detected foreground tiles')
             end
-
-            % Keep only the tile positions of foreground tiles
-            pts = pts(:,labels == idx_foreground);
-            pts3d = pts3d(:,labels == idx_foreground);
             
-            % Use a distance based scan on the x/y plane to get rid of
-            % noise which maybe has been assigned to the foreground cluster
-            [core, border, noise] = simple_dbscan(pts3d(1:2,:),0.15,20);        
-
-            % We keep the core and border points
-            pts_x = pts(1,[core border]);
-            pts_y = pts(2,[core border]);
+            % Remove isolated foreground tiles
+            I = bwareaopen(I, 20);           
             
             if do_plot
                 % Plot the foreground tiles which are cleaned from outliers
-                I = zeros(size(ncc_matrix));
-                I(sub2ind(size(I),pts_x(:),pts_y(:))) = 1;
                 subplot(1,2,2)
                 imshow(I)
                 title('Detected foreground tiles w.o. outliers')
             end
 
             % Add the detected foreground tiles to the storeage
-            pts_all = [pts_all, [pts_x; pts_y]];
+            pts_all = [pts_all; find(I(:) ~= 0)];
         end
         
         % Generate a binary image from all detected foreground tiles
         I = zeros(size(ncc_matrix));
-        I(sub2ind(size(I),pts_all(1,:),pts_all(2,:))) = 1;
+        I(pts_all) = 1;
         
         if do_plot
             % Plot the accumulated foreground tiles image
             figure
             subplot(1,2,1)
             imshow(I)
-            title('All detected foreground tiles w.o. outliers')
+            title('All detected foreground tiles')
         end
         
+        % Connect tiles which are close to each other
+        I = imclose(I,2);
         
-        % Connect marked tiles with small distance
-        se = strel(ones(4,1));
-        I = imclose(I, se);
-
         if do_plot
-            % Plot the connected tiles
+            % Plot the accumulated foreground tiles image
             subplot(1,2,2)
             imshow(I)
-            title('Foreground tiles after closing')
+            title('All foreground tiles after closing')
         end
+
+        % Find pixel positions of foreground area(s)
+        pixels = find(I(:) ~= 0);
 
         % Find countours around "blobs"
         CC = bwconncomp(I);
@@ -136,6 +117,7 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
             pixels = CC.PixelIdxList{idx};
             [tile_rows, tile_cols] = ind2sub(size(I), pixels');
 
+
             % Convert from tile positions back to pixel positions
             pts2 = [tile_cols * tile_w; tile_rows * tile_h] - [tile_w / 2; tile_h / 2];
 
@@ -148,7 +130,7 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
 
 
             % Contour points
-            contour = boundary(pts2(1,:)', pts2(2,:)', 1);              
+            contour = boundary(pts2(1,:)', pts2(2,:)', 0.5);              
             contour_points = [pts2(1,contour); pts2(2,contour)];
         
             % Add region of Interest to ROI array

@@ -9,7 +9,7 @@ function foreground_mask = generate_mask(tensor_l, rois, do_plot)
     % Extract first image from tensor
     I1 = tensor_l(:,:, 1);
     padding_h = 0;
-    padding_v = 0;
+    padding_v = 20;
     
     % Initialize foreground mask with zeros
     foreground_mask = zeros(size(I1));
@@ -100,15 +100,8 @@ function foreground_mask = generate_mask(tensor_l, rois, do_plot)
     end
     
     %% Binarize foreground mask
-    se = strel('disk', 1);
-    foreground_mask = foreground_mask >= 0.6;
-    foreground_mask = imdilate(foreground_mask, se);
+    foreground_mask = imgaussfilt(double(foreground_mask),5);
+    foreground_mask = foreground_mask >= 0.3;    
     
-    %% Smothen edges
-    foreground_mask = imgaussfilt(double(foreground_mask),3) > 0.5;
-    
-    %% Fill holes    
-    se = strel('disk', 5);
-    foreground_mask = imdilate(foreground_mask, se);
 end
 

@@ -10,7 +10,7 @@ function [labels, cluster_means] = simple_k_means(pts, k, initial_vectors, conve
             cluster_mean = cluster_means(:,i);
             distance_vectors = pts - cluster_mean;
             distance_vectors = distance_vectors .^ 2;
-            distances(i,:) = sum(distance_vectors);
+            distances(i,:) = ones(1, size(pts,1)) * distance_vectors;
 
         end
 

@@ -1,4 +1,4 @@
-start_frame = 961;
+start_frame = 1084;
 N = 3;
 imreader = ImageReader('C:\Users\Daniel\Desktop\Studium\Master\1. Semester\02 Computer Vision\Challenge\Datasets\P1E_S1', 1, 3, start_frame, N)
 reader_time = 0;
