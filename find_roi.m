@@ -44,8 +44,12 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
             ncc_max = max(ncc_values);            
             [labels,codebook] = simple_k_means(ncc_values, k, linspace(ncc_min,ncc_max,k), 0, 50 );    
             
+            % Remove codebook entries for empty clusters
+            codebook(isnan(codebook)) = [];
+            
             % Clusters with small ncc are assumed to be foreground
-            idx_foreground = 1:floor(k/2);
+            clusters = max(1, floor(numel(codebook) / 2));
+            idx_foreground = 1:clusters;
             
             if codebook(idx_foreground(end)) > 0.35
                 % The small correlation cluster still has a relatively
