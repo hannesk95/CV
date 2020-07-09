@@ -32,7 +32,7 @@ ir = ImageReader(src, L, R, start, N);
 %% Output Settings
 
 % Specify output path and name
-dst = "./output.avi";
+dest = "./output.avi";
 
 %% Load Virual Background
 

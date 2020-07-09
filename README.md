@@ -1,12 +1,14 @@
-Diese README Datei beschreibt schrittweise, wie das vorliegende Programm ausgeführt werden muss um dieses ordnungsgemäß zu starten. 
+Diese README Datei beschreibt schrittweise, wie das vorliegende Programm ausgeführt werden muss, um dieses ordnungsgemäß zu starten. 
 Desweiteren ist hier auch aufgelistet welche Zusatzmodule (Libraries) für eine erfolgreiche Ausführung notwendig sind, und welche 
-Matlab Versionen erfolgreich getestet wurden. 
+Matlab Versionen vom Hersteller-Team erfolgreich getestet wurden. 
 
-[INFO]: Getestete Matlab Release Versionen: R2019a, R2020a
+[INFO]:	Getestete Matlab Release Versionen: R2019a, R2020a
 
-Auflistung notwendiger Matlab Zusatzmodule:
-- Computer Vision Toolbox
-- Image Processing Toolbox
+
+[INFO]:	Auflistung notwendiger Matlab Zusatzmodule:
+	- Computer Vision Toolbox
+	- Image Processing Toolbox
+
 
 Start des Programms (2 Möglichkeiten):
 1. 	Aufruf: start_gui (graphische Benutzeroberfläche wird gestartet)
@@ -26,11 +28,18 @@ Start des Programms (2 Möglichkeiten):
 	
 	oder
 
-1. 	Anpassung der config.m Datei
-1.1.	Spezifikation des Szenen Ordners
-1.2.	Auswahl der Kameras für links und rechts
-1.3.	Start Bild auswählen
-2. 	Aufruf der challenge.m Datei
+2. 	Anpassung der 'config.m' Datei (Datei öffnen und Anweisungen innerhalb der Datei folgen).
+	Anpassungen umfassen ähnlich wie in Möglichkeit 1 angegeben:
+	- Auswahl des Szenenordnerpfades (Zuweisung der Variable 'src').
+	- Auswahl der linken und rechten Kamera (Zuweisung der Variablen 'L' und 'R').
+	- Auswahl des Start Frames (Zuweisung der Variable 'start').
+	- Auswahl der Anzahl der Nachfolgebilder (Zuweisung der Variable 'N').
+	- Auswahl des Outputpfades für das Video und dessen Name (Zuweisung der Variable 'dst').
+	- Auswahl eines virtuellen Hintergrundbildes, falls erwünscht (Zuweisung über Variable 'bg', wenn nicht erwünscht 'bg = 0').
+	- Auswahl des Renderingmodus (Zuweisung der 'mode' Variable, Bsp: Wenn virtueller Hintergrund erwünscht, dann 'mode = substitue').
+	- Über die Variable 'store' kann über einen logischen-Wert (true/false) festgelegt werden, ob der Output-Stream gespeichert werden soll. 
+	- Alle Änderungen speichern. 
+2.1. 	Ausführen der 'challenge.m' Datei. 
 
 
 
