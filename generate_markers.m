@@ -2,7 +2,7 @@ function [fgm, bgm] = generate_markers(I)
     
     %% Preprocessing
     % Opening-by-Reconstruction
-    se = strel('disk',3);
+    se = strel('disk',5);
     Ie = imerode(I,se);
     Iobr = imreconstruct(Ie,I);
     
@@ -15,13 +15,12 @@ function [fgm, bgm] = generate_markers(I)
     fgm1 = imregionalmax(Iobrcbr);
 
     % Shrink markers by a closing followed by an erosion
-    %se2 = strel('disk', 1);
-    %fgm2 = imclose(fgm1,se2);
-    %fgm3 = imerode(fgm2,se2);
-    fgm3 = fgm1;
+    se2 = strel('disk', 1);
+    fgm2 = imclose(fgm1,se2);
+    fgm3 = imerode(fgm2,se2);
     
     % Remove isolated pixels
-    fgm = bwareaopen(fgm3, 3);
+    fgm = bwareaopen(fgm3, 2);
     
     %% Generate background markers    
     bw = imbinarize(Iobrcbr, 'adaptive','ForegroundPolarity','bright','Sensitivity',0.8);

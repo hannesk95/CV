@@ -30,7 +30,7 @@ function foreground_mask = generate_mask(tensor_l, rois, do_plot)
             
         if do_plot
             figure
-            subplot(2,2,1);
+            subplot(1,2,1);
             imshow(I1_detail);
             title('Region of Interest')
         end
@@ -38,23 +38,24 @@ function foreground_mask = generate_mask(tensor_l, rois, do_plot)
         %% Generate boundary mask inside of ROI
         mask = zeros(size(I1_detail));
         if ~isempty(contour_point)
-            top_left = boundary_box(1,:) - [padding_h padding_v];
-            top_left = max(top_left, [1 1]);
-            contour_point_0 = contour_point - top_left';
-            mask = roipoly(mask,contour_point_0(1,:)',contour_point_0(2,:)');
+            %top_left = boundary_box(1,:) - [padding_h padding_v];
+            %top_left = max(top_left, [1 1]);
+            %contour_point_0 = contour_point - top_left';
+            %mask = roipoly(mask,contour_point_0(1,:)',contour_point_0(2,:)');
+            mask = generate_ellipse(size(mask,2),size(mask,1));
         else
             % No contour points provided, use generic ellipse
             mask = generate_ellipse(size(mask,2),size(mask,1));
         end
             
         if do_plot
-            subplot(2,2,2);
+            subplot(1,2,2);
             imshow(uint8(mask) * 255 * 0.3 + I1_detail * 0.7);
             title('Over-approximated mask')
         end
             
         %% Perform watershed segmentation
-        labels = watershed_segmentation(I1_detail);    
+        labels = watershed_segmentation(I1_detail, do_plot);    
          
         %% Calculate relative area of each segment inside the over-approximated mask
         N_segments = max(labels(:));
@@ -67,7 +68,7 @@ function foreground_mask = generate_mask(tensor_l, rois, do_plot)
             
         if do_plot
             Lrgb = label2rgb(labels,'jet','w','shuffle');
-            subplot(2,2,3);
+            figure
             imshow(Lrgb - uint8(~mask) * 150);
             title('Watershed segmentation')
         end
@@ -96,12 +97,15 @@ function foreground_mask = generate_mask(tensor_l, rois, do_plot)
         figure
         h = surf(foreground_mask);
         set(h,'LineStyle','none')
-        title('Accumulated segment weights')
+        title('Segment weights')
     end
     
     %% Binarize foreground mask
-    foreground_mask = imgaussfilt(double(foreground_mask),5);
-    foreground_mask = foreground_mask >= 0.3;    
+    foreground_mask = foreground_mask >= 0.85;
+    
+    % Remove segment partition lines
+    se = strel('disk',1);
+    foreground_mask = imdilate(foreground_mask,se);
     
 end
 

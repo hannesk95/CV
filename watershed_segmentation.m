@@ -1,19 +1,20 @@
-function Labels = watershed_segmentation(I)
+function Labels = watershed_segmentation(I, do_plot)
 %WATERSHED_SEGMENTATION Finds segments along edges
 %   left    Left channel tensor
 %   right   Right channel tensor
 
 %% Generate markers
 [fgm, bgm] = generate_markers(I);
-%I = locallapfilt(I, 0.4, 0.5);
-%I = labeloverlay(image_in,fgm);
-%figure
-%imshow(I)
+if do_plot
+    I2 = labeloverlay(I,fgm);
+    figure
+    imshow(I2)
+end
 
 %% Image segmentation
 
 % Calculate magnitude of gradient
-gmag = imgradient(I, 'intermediate');
+gmag = imgradient(I, 'sobel');
 
 % Compute the watershed-based segmentation
 gmag2 = imimposemin(gmag, bgm | fgm);

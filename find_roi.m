@@ -20,12 +20,12 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
         % Extract first gray image in scaled size
         I1 = tensor_l_scaled_gray(:,:,1); 
 
-        % Storeage for foreground tiles
-        pts_all = [];
+        % Storeage for ncc matricies
+        ncc_matricies = cell(1,N);
 
         % NCC tile size
-        tile_w = 20;
-        tile_h = 20;
+        tile_w = 15;
+        tile_h = 15;
 
         for i = 1:N
             
@@ -35,80 +35,46 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
             % Calculate cross correlation between images
             ncc_matrix = correlation(I1,I2, [tile_w tile_h]);
             
-            % Store ncc values as vector
-            ncc_values = ncc_matrix(:)';      
-
-            % Cluster points based on their ncc values into k clusters
-            k = 5;
-            ncc_min = min(ncc_values);
-            ncc_max = max(ncc_values);            
-            [labels,codebook] = simple_k_means(ncc_values, k, linspace(ncc_min,ncc_max,k), 0, 50 );    
-            
-            % Remove codebook entries for empty clusters
-            codebook(isnan(codebook)) = [];
-            
-            % Clusters with small ncc are assumed to be foreground
-            clusters = max(1, floor(numel(codebook) / 2));
-            idx_foreground = 1:clusters;
-            
-            if codebook(idx_foreground(end)) > 0.35
-                % The small correlation cluster still has a relatively
-                % high correlation, its probably shadows or light
-                % flickering
-                idx_foreground = 0;
-            end
-            
-            % Draw foreground tiles into binary image
-            I = zeros(size(ncc_matrix));
-            I(ismember(labels,idx_foreground)) = 1;
-            
-            if do_plot
-                % Plot the detected foreground tiles
-                figure                
-                subplot(1,2,1)
-                imshow(I)
-                title('Detected foreground tiles')
-            end
-            
-            % Remove isolated foreground tiles
-            I = bwareaopen(I, 20);           
-            
-            if do_plot
-                % Plot the foreground tiles which are cleaned from outliers
-                subplot(1,2,2)
-                imshow(I)
-                title('Detected foreground tiles w.o. outliers')
-            end
-
-            % Add the detected foreground tiles to the storeage
-            pts_all = [pts_all; find(I(:) ~= 0)];
+            % Save ncc matrix
+            ncc_matricies{i} = ncc_matrix;
         end
         
-        % Generate a binary image from all detected foreground tiles
-        I = zeros(size(ncc_matrix));
-        I(pts_all) = 1;
+        
+        % Sum over all ncc matricies
+        ncc_sum = zeros(size(ncc_matrix));
+        for i = 1:N
+            ncc_sum = ncc_sum + cell2mat(ncc_matricies(i));
+        end
+       
+        % Compare ncc values with threshold
+        I = ncc_sum <= 0.5;
         
         if do_plot
-            % Plot the accumulated foreground tiles image
             figure
-            subplot(1,2,1)
+            subplot(2,2,1)
             imshow(I)
-            title('All detected foreground tiles')
+            title('Binarized ncc matrix')
         end
         
-        % Connect tiles which are close to each other
-        I = imclose(I,2);
+        % Remove isolated pixels/tiles
+        I = bwareaopen(I, 5);        
         
         if do_plot
-            % Plot the accumulated foreground tiles image
-            subplot(1,2,2)
+            subplot(2,2,2)
             imshow(I)
-            title('All foreground tiles after closing')
+            title('Remove isolated pixels')
         end
-
-        % Find pixel positions of foreground area(s)
-        pixels = find(I(:) ~= 0);
-
+        
+        % Connect tiles which are close together
+        se = strel('disk', 5);
+        I = imclose(I,se);
+        
+        if do_plot
+            subplot(2,2,3)
+            imshow(I)
+            title('Closing')
+        end
+        
         % Find countours around "blobs"
         CC = bwconncomp(I);
 
@@ -134,7 +100,7 @@ function ROIs = find_roi(tensor_l_scaled_gray, scaling_factor, do_plot)
 
 
             % Contour points
-            contour = boundary(pts2(1,:)', pts2(2,:)', 0.5);              
+            contour = boundary(pts2(1,:)', pts2(2,:)', 0.3);              
             contour_points = [pts2(1,contour); pts2(2,contour)];
         
             % Add region of Interest to ROI array
