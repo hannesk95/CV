@@ -33,7 +33,7 @@ while loop ~= 1
     mask = segmentation(left, right);
     
     % Render new frame
-    movie = render(left(:,:,1:3),mask, bg, mode);
+    movie = render(left(:,:,1:3),mask, bg, render_mode);
     
     % Write new frame to movie if necessary
     if store
