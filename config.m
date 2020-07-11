@@ -10,6 +10,8 @@ members = {'Hacket Franziska', 'Bluemcke Patrick', 'Muhr Florian', 'Stuemke Dani
 % Email-Address (from Moodle!):
 mail = {'franziska.hacket@tum.de', 'patrick.bluemcke@tum.de', 'daniel.stuemke@tum.de', 'f.muhr@tum.de', 'johannes.kiechle@tum.de'};
 
+% Add function folder to MATLAB-path
+addpath([pwd , '\func'])
 
 %% Setup Image Reader
 
