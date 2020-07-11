@@ -38,10 +38,19 @@ switch render_mode
         end
         
 	case 'overlay' % Set background and foreground to different colors
-        % background: black, foreground: white
-        for i = 1:3 % For some reason it does not seem to work without loop (with 600x800x3-Mask, R2017b)
-            result(:, :, i) = frame(:, :, i) & ~mask;
-        end
+        % Sets the ratio between the image and the overlay mask - if
+        % factor_image = 1, then the mask is not transparent any more, 
+        % if factor_image = 0, then the image remains unaltered 
+        factor_image = 0.5;
+        
+        % background: red, foreground: green
+        result = factor_image .* frame;
+        
+        % Red Channel: Add removed parts where Mask is not 1;
+        result(:, :, 1) = result(:, :, 1) + ~mask * (1-factor_image);
+        
+        % Green Channel: Add removed parts where Mask is 1;
+        result(:, :, 2) = result(:, :, 2) + mask * (1-factor_image);
         
 	case 'substitute' % Use rgb-image passed in bg as background
         % Resize bg
