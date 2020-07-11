@@ -47,7 +47,7 @@ bg = 0;
 %% Select rendering mode
 
 % Possible modes: foreground, background, overlay, substitute
-mode = "foreground";
+render_mode = "foreground";
 
 % Store Output?
 store = true;
