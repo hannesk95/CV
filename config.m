@@ -11,7 +11,11 @@ members = {'Hacket Franziska', 'Bluemcke Patrick', 'Muhr Florian', 'Stuemke Dani
 mail = {'franziska.hacket@tum.de', 'patrick.bluemcke@tum.de', 'daniel.stuemke@tum.de', 'f.muhr@tum.de', 'johannes.kiechle@tum.de'};
 
 % Add function folder to MATLAB-path
-addpath([pwd , '\func'])
+if contains(pwd, '\')
+    addpath([pwd , '\func'])
+else
+    addpath([pwd , '/func'])
+end
 
 %% Setup Image Reader
 
